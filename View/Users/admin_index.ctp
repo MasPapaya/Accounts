@@ -1,4 +1,3 @@
-
 <div class="span3">
 	<div class="well">
 		<ul class="nav nav-list">
@@ -10,7 +9,7 @@
 
 <div class="span8">
 	<h2><?php echo __('Users'); ?></h2>
-	<table class="table table-striped table-bordered table-condensed">
+    <table class="table table-striped table-bordered table-condensed">
 		<tr>
 			<th><?php echo $this->Paginator->sort('id'); ?></th>
 			<th><?php echo $this->Paginator->sort('username'); ?></th>
