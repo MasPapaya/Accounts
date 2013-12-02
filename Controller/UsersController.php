@@ -200,6 +200,7 @@ class UsersController extends AccountsAppController {
 					$this->UserLog->create(array(
 						'username' => $this->request->data['User']['username'],
 						'ip' => $this->request->clientIp(),
+						'user_agent' => $_SERVER['HTTP_USER_AGENT'],
 						'is_correct' => 1
 						)
 					);
@@ -230,6 +231,7 @@ class UsersController extends AccountsAppController {
 					$this->UserLog->create(array(
 						'username' => $this->request->data['User']['username'],
 						'ip' => $this->request->clientIp(),
+						'user_agent' => $_SERVER['HTTP_USER_AGENT'],
 						'is_correct' => 0
 						)
 					);
