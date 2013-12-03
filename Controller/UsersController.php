@@ -72,16 +72,18 @@ class UsersController extends AccountsAppController {
 				$this->request->data['User']['deleted'] = Configure::read('zero_datetime');
 
 				if ($this->User->save($this->request->data, false)) {
-					$this->loadModel('Acl.ManagedAro');
-					$this->ManagedAro->create(array(
-						'parent_id' => $this->request->data['User']['group_id'],
-						'model' => 'User',
-						'foreign_key' => $this->User->id,
-						'alias' => $this->request->data['User']['username'],
-					));
 
-					$this->ManagedAro->save();
+					if (Configure::read('Accounts.register.aros') && CakePlugin::loaded('Acl')) {
+						$this->loadModel('Acl.ManagedAro');
+						$this->ManagedAro->create(array(
+							'parent_id' => $this->request->data['User']['group_id'],
+							'model' => 'User',
+							'foreign_key' => $this->User->id,
+							'alias' => $this->request->data['User']['username'],
+						));
 
+						$this->ManagedAro->save();
+					}
 
 					if (Configure::read('Accounts.add.send.email')) {
 						$this->__send_email($this->request->data['User']['username'], $this->request->data['User']['password'], $this->request->data['User']['email']);
@@ -307,7 +309,6 @@ class UsersController extends AccountsAppController {
 			if (empty($this->request->data['Profile']['location_id'])) {
 				unset($this->request->data['Profile']['location_id']);
 			}
-
 			/* ====== LOCATION ========= */
 
 			if (Configure::check('Accounts.register.captcha') && Configure::read('Accounts.register.captcha') == TRUE) {
@@ -381,6 +382,17 @@ class UsersController extends AccountsAppController {
 							$this->Session->setFlash(__('All valid.'), 'flash/success');
 
 							if ($this->User->save($user)) {
+								if (Configure::read('Accounts.register.aros') && CakePlugin::loaded('Acl')) {
+									$this->loadModel('Acl.ManagedAro');
+									$this->ManagedAro->create(array(
+										'parent_id' => $this->request->data['User']['group_id'],
+										'model' => 'User',
+										'foreign_key' => $this->User->id,
+										'alias' => $this->request->data['User']['username'],
+									));
+
+									$this->ManagedAro->save();
+								}
 								if (Configure::read('Accounts.register.data') == 'attributes' || Configure::read('Accounts.register.data') == 'both') {
 									$this->Attribute->saveAll($this->request->data['AttributeType'], $this->User->id);
 								}
@@ -470,11 +482,20 @@ class UsersController extends AccountsAppController {
 		if ($this->request->is('post')) {
 
 			$user = $this->User->find('first', array(
-				'conditions' => array(
-					'username' => $this->request->data['User']['username'],
-					'email' => $this->request->data['User']['email'],
-				)
-				));
+			'conditions' => array(
+			'username' => $this->request->data['User']['username'],
+			'email' => $thi$this->loadModel('Acl.ManagedAro');
+			$this->ManagedAro->create(array(
+				'parent_id' => $this->request->data['User']['group_id'],
+				'model' => 'User',
+				'foreign_key' => $this->User->id,
+				'alias' => $this->request->data['User']['username'],
+			));
+
+			$this->ManagedAro->save();
+			s->request->data['User']['email'],
+			)
+			));
 
 			if (!empty($user)) {
 				$password = '';
