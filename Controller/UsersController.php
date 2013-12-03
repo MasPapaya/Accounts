@@ -482,20 +482,11 @@ class UsersController extends AccountsAppController {
 		if ($this->request->is('post')) {
 
 			$user = $this->User->find('first', array(
-			'conditions' => array(
-			'username' => $this->request->data['User']['username'],
-			'email' => $thi$this->loadModel('Acl.ManagedAro');
-			$this->ManagedAro->create(array(
-				'parent_id' => $this->request->data['User']['group_id'],
-				'model' => 'User',
-				'foreign_key' => $this->User->id,
-				'alias' => $this->request->data['User']['username'],
-			));
-
-			$this->ManagedAro->save();
-			s->request->data['User']['email'],
-			)
-			));
+				'conditions' => array(
+					'username' => $this->request->data['User']['username'],
+					'email' => $this->request->data['User']['email'],
+				)
+				));
 
 			if (!empty($user)) {
 				$password = '';
