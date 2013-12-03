@@ -14,7 +14,6 @@ class UserLogsController extends AccountsAppController {
 	}
 
 // 	public function isAuthorized() {
-
 // //		parent::isAuthorized();
 // 		switch ($this->Auth->user('group_id')) {
 // 			case 1:
@@ -118,6 +117,48 @@ class UserLogsController extends AccountsAppController {
 		}
 		$this->Session->setFlash(__('User log was not deleted'), 'flash/error');
 		$this->redirect(array('action' => 'index'));
+	}
+
+	public function admin_search($page = NULL) {
+
+		$conditions = array();
+		if (isset($this->request->data['UserLog']['search_log']) and $this->request->data['UserLog']['search_log'] != " " and strlen($this->request->data['UserLog']['search_log']) > 2) {
+			$fields = trim($this->request->data['UserLog']['search_log'], " ");
+			$search = explode(" ", $fields);
+			for ($i = 0; $i < count($search); $i++) {
+				if (strlen($search[$i]) > 2) {
+					$conditions[] = "UserLog.username like '%" . $search[$i] . "%'";
+				}
+			}
+			$logs_search = $this->paginate('UserLog', array(
+				'OR' => $conditions,
+				));
+			$this->Session->write('conditions', $conditions);
+			if (count($logs_search) == 0) {
+				$this->Session->setFlash('No se encontraron Registros!.', 'flash/warning');
+			}
+			$this->set('logs_search', $logs_search);
+		} else {
+
+			if (!empty($this->request->params['named']['page'])) {
+
+				$this->paginate = array(
+					'UserLog' => array(
+						'page' => $this->request->params['named']['page'],
+					)
+				);
+				if ($this->Session->read('conditions')) {
+					$logs_search = $this->paginate('UserLog', array('OR' => $this->Session->read('conditions')));
+				} else {
+					$logs_search = $this->paginate('UserLog');
+				}
+
+				$this->set('logs_search', $logs_search);
+			} else {
+				$this->Session->setFlash('No se encontraron Registros!.', 'flash/warning');
+				$this->redirect(array('action' => 'index'));
+			}
+		}
 	}
 
 }

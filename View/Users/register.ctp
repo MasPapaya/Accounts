@@ -39,7 +39,7 @@ $this->Html->css(array(
 				echo $this->Form->input('Profile.last_name');
 				echo __('Gender') . '<br/>';
 				echo $this->Form->input('Profile.gender', array('type' => 'radio', 'options' => array('M' => __('Male'), 'F' => __('Female')), 'legend' => false));
-				if (Configure::read('Configuration.location') == 'tree') {
+				if (Configure::read('Configuration.location.tree')) {
 					echo $this->Locations->input('Profile', $locations);
 				} else {
 					echo $this->Form->input('Profile.location_id', array('options' => $locations, 'default' => 'empty', 'empty' => 'Seleccione un Pais'));

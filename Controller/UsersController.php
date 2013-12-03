@@ -31,7 +31,6 @@ class UsersController extends AccountsAppController {
 	}
 
 	public function admin_index() {
-
 		$this->User->recursive = 1;
 
 		if ($this->authuser['Group']['name'] == 'superadmin') {
@@ -60,6 +59,8 @@ class UsersController extends AccountsAppController {
 	}
 
 	public function admin_add() {
+
+
 		if ($this->request->is('post')) {
 			$this->User->create();
 
@@ -69,9 +70,21 @@ class UsersController extends AccountsAppController {
 				// $this->request->data['User']['password'] = $this->Auth->password($this->request->data['User']['password']);
 				$this->request->data['User']['banned'] = Configure::read('zero_datetime');
 				$this->request->data['User']['deleted'] = Configure::read('zero_datetime');
+
 				if ($this->User->save($this->request->data, false)) {
+					$this->loadModel('Acl.ManagedAro');
+					$this->ManagedAro->create(array(
+						'parent_id' => $this->request->data['User']['group_id'],
+						'model' => 'User',
+						'foreign_key' => $this->User->id,
+						'alias' => $this->request->data['User']['username'],
+					));
+
+					$this->ManagedAro->save();
+
+
 					if (Configure::read('Accounts.add.send.email')) {
-					$this->__send_email($this->request->data['User']['username'], $this->request->data['User']['password'], $this->request->data['User']['email']);
+						$this->__send_email($this->request->data['User']['username'], $this->request->data['User']['password'], $this->request->data['User']['email']);
 					}
 					$this->User->UserPassword->create(array(
 						'user_id' => $this->User->id,
@@ -110,7 +123,7 @@ class UsersController extends AccountsAppController {
 			}
 
 			$this->User->set($this->request->data);
-			$this->User->validator()->remove('birthday', 'adult');
+//			$this->User->validator()->remove('birthday', 'adult');
 			if ($this->User->validates()) {
 				if (!empty($this->request->data['User']['password'])) {
 					// $this->request->data['User']['password'] = $this->Auth->password($this->request->data['User']['password']);
@@ -284,7 +297,7 @@ class UsersController extends AccountsAppController {
 		if ($this->request->is('post') || $this->request->is('put')) {
 
 			/* ====== LOCATION ========= */
-			if (Configure::read('Configuration.location') == 'tree') {
+			if (Configure::read('Configuration.location.tree')) {
 				$array_locations = array_filter($this->request->data['Profile']['location_id']);
 				$locations = $this->Location->sections($this->request->data['Profile']['location_id']);
 				$locations_post = $this->request->data['Profile']['location_id'];
@@ -404,11 +417,11 @@ class UsersController extends AccountsAppController {
 				$this->Session->setFlash(__('User Data is not valid.'), 'flash/error');
 				// debug($this->User->validationErrors);
 			}
-			if (Configure::read('Configuration.location') == 'tree') {
+			if (Configure::read('Configuration.location.tree')) {
 				$this->request->data['Profile']['location_id'] = $locations_post;
 			}
 		} else {
-			if (Configure::read('Configuration.location') == 'tree') {
+			if (Configure::read('Configuration.location.tree')) {
 				$locations = $this->Location->sections(array(0 => null));
 			} else {
 				$locations = $this->Location->find('list');
@@ -570,7 +583,7 @@ class UsersController extends AccountsAppController {
 			if ($this->request->is('post') || $this->request->is('put')) {
 
 				/* ====== LOCATION ========= */
-				if (Configure::read('Configuration.location') == 'tree') {
+				if (Configure::read('Configuration.location.tree')) {
 					$locations = $this->Location->sections($this->request->data['Profile']['location_id']);
 					$locations_post = $this->request->data['Profile']['location_id'];
 					$this->request->data['Profile']['location_id'] = end($this->request->data['Profile']['location_id']);
@@ -584,13 +597,13 @@ class UsersController extends AccountsAppController {
 				} else {
 					$this->Session->setFlash(__('The profile could not be saved. Please, try again.'), 'flash/error');
 				}
-				if (Configure::read('Configuration.location') == 'tree') {
+				if (Configure::read('Configuration.location.tree')) {
 					$this->request->data['Profile']['location_id'] = $locations_post;
 				}
 			} else {
 				$this->request->data = $profile;
 			}
-			if (Configure::read('Configuration.location') == 'tree') {
+			if (Configure::read('Configuration.location.tree')) {
 				$this->request->data['Profile']['location_id'] = array_reverse($this->Location->load_parent($this->request->data['Profile']['location_id']));
 				$locations = $this->Location->sections($this->request->data['Profile']['location_id']);
 			} else {

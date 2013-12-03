@@ -15,6 +15,7 @@
 		echo $this->Form->input('group_id');
 		echo $this->Form->input('username', array('type' => 'text', 'disabled' => 'disabled'));
 		echo $this->Form->input('password', array('required' => false));
+		echo $this->Form->input('password_2', array('label'=>__('Repeat Password'),'type'=>'password', 'required' => false));				
 //		echo $this->Form->input('fbid', array('type'=>'text','disabled'=>'disabled'));
 //		echo $this->Form->input('twid', array('type'=>'text','disabled'=>'disabled'));
 		echo $this->Form->input('email', array('type' => 'text', 'disabled' => 'disabled'));
