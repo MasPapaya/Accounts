@@ -70,7 +70,9 @@ class UsersController extends AccountsAppController {
 				$this->request->data['User']['banned'] = Configure::read('zero_datetime');
 				$this->request->data['User']['deleted'] = Configure::read('zero_datetime');
 				if ($this->User->save($this->request->data, false)) {
-					//$this->__send_email($this->request->data['User']['username'], $this->request->data['User']['password'], $this->request->data['User']['email']);
+					if (Configure::read('Accounts.add.send.email')) {
+					$this->__send_email($this->request->data['User']['username'], $this->request->data['User']['password'], $this->request->data['User']['email']);
+					}
 					$this->User->UserPassword->create(array(
 						'user_id' => $this->User->id,
 						'password' => $this->request->data['User']['password']
@@ -577,7 +579,7 @@ class UsersController extends AccountsAppController {
 
 				if ($this->Profile->save($this->request->data)) {
 
-					$this->Session->setFlash(__('The profile has been saved'), 'flash/success');
+					$this->Session->setFlash(__('The profile has been saved.'), 'flash/success');
 					$this->redirect(array('action' => 'myprofile'));
 				} else {
 					$this->Session->setFlash(__('The profile could not be saved. Please, try again.'), 'flash/error');
