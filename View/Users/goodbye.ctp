@@ -6,5 +6,5 @@
  */
 ?>
 <div>
-	<h2><?php echo __('Good bye!');?></h2>
+	<h2 class="good_bye"><?php echo __('Good bye!');?></h2>
 </div>

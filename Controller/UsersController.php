@@ -22,8 +22,10 @@ class UsersController extends AccountsAppController {
 		if (Configure::read('debug') > 1) {
 			$this->Auth->allow();
 		} else {
-			$this->Auth->allow(array('login', 'register', 'logout'));
+			$this->Auth->allow(array('login', 'register', 'logout', 'goodbye','admin_logout'));
 		}
+
+		$this->loadModel('Accounts.User');
 	}
 
 	public function beforeRender() {
@@ -60,7 +62,6 @@ class UsersController extends AccountsAppController {
 
 	public function admin_add() {
 
-
 		if ($this->request->is('post')) {
 			$this->User->create();
 
@@ -75,14 +76,22 @@ class UsersController extends AccountsAppController {
 
 					if (Configure::read('Accounts.register.aros') && CakePlugin::loaded('Acl')) {
 						$this->loadModel('Acl.ManagedAro');
-						$this->ManagedAro->create(array(
-							'parent_id' => $this->request->data['User']['group_id'],
-							'model' => 'User',
-							'foreign_key' => $this->User->id,
-							'alias' => $this->request->data['User']['username'],
-						));
+						$parent = $this->ManagedAro->find('first', array(
+							'conditions' => array('ManagedAro.model' => 'Group', 'ManagedAro.foreign_key' => $this->request->data['User']['group_id'])
+							));
+						if (!empty($parent)) {
+							$this->ManagedAro->create(array(
+								'parent_id' => $parent['ManagedAro']['id'],
+								'model' => 'User',
+								'foreign_key' => $this->User->id,
+								'alias' => $this->request->data['User']['username'],
+							));
 
-						$this->ManagedAro->save();
+							$this->ManagedAro->save();
+						} else {
+							$this->Session->setFlash(__('Please ask the administrator to fix ACL, user groups'), 'flash/error');
+							return true;
+						}
 					}
 
 					if (Configure::read('Accounts.add.send.email')) {
@@ -120,9 +129,9 @@ class UsersController extends AccountsAppController {
 
 //		pr($this->request->data);
 		if ($this->request->is('post') || $this->request->is('put')) {
-			if (empty($this->request->data['User']['password'])) {
-				unset($this->request->data['User']['password']);
-			}
+//			if (empty($this->request->data['User']['password'])) {
+//				unset($this->request->data['User']['password']);
+//			}
 
 			$this->User->set($this->request->data);
 //			$this->User->validator()->remove('birthday', 'adult');
@@ -382,16 +391,25 @@ class UsersController extends AccountsAppController {
 							$this->Session->setFlash(__('All valid.'), 'flash/success');
 
 							if ($this->User->save($user)) {
+
 								if (Configure::read('Accounts.register.aros') && CakePlugin::loaded('Acl')) {
 									$this->loadModel('Acl.ManagedAro');
-									$this->ManagedAro->create(array(
-										'parent_id' => $this->request->data['User']['group_id'],
-										'model' => 'User',
-										'foreign_key' => $this->User->id,
-										'alias' => $this->request->data['User']['username'],
-									));
+									$parent = $this->ManagedAro->find('first', array(
+										'conditions' => array('ManagedAro.model' => 'Group', 'ManagedAro.foreign_key' => $this->request->data['User']['group_id'])
+										));
+									if (!empty($parent)) {
+										$this->ManagedAro->create(array(
+											'parent_id' => $parent['ManagedAro']['id'],
+											'model' => 'User',
+											'foreign_key' => $this->User->id,
+											'alias' => $this->request->data['User']['username'],
+										));
 
-									$this->ManagedAro->save();
+										$this->ManagedAro->save();
+									} else {
+										$this->Session->setFlash(__('Please ask the administrator to fix ACL, user groups'), 'flash/error');
+										return true;
+									}
 								}
 								if (Configure::read('Accounts.register.data') == 'attributes' || Configure::read('Accounts.register.data') == 'both') {
 									$this->Attribute->saveAll($this->request->data['AttributeType'], $this->User->id);
