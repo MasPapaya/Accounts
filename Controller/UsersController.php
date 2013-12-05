@@ -22,7 +22,7 @@ class UsersController extends AccountsAppController {
 		if (Configure::read('debug') > 1) {
 			$this->Auth->allow();
 		} else {
-			$this->Auth->allow(array('login', 'register', 'logout', 'goodbye','admin_logout'));
+			$this->Auth->allow(array('login', 'register', 'logout', 'goodbye', 'admin_logout', 'remember'));
 		}
 
 		$this->loadModel('Accounts.User');
@@ -515,7 +515,7 @@ class UsersController extends AccountsAppController {
 
 				$crypted_password = $this->Auth->password($password);
 
-				if ($this->User->save(array('id' => $user['User']['id'], 'password' => $crypted_password))) {
+				if ($this->User->updateAll(array('User.password' => "'" . $crypted_password . "'"), array('User.id' => $user['User']['id']))) {
 
 					$email = new CakeEmail('smtp'); // Definirlo con variable de configuracion
 					$email->viewVars(array('id' => $user['User']['id'], 'username' => $user['User']['username'], 'password' => $password));
@@ -523,7 +523,7 @@ class UsersController extends AccountsAppController {
 
 					$this->Session->setFlash(__('A new password has been sent to your email.'), 'flash/success');
 					$this->redirect('/');
-				} else {
+				} else {					
 					$this->Session->setFlash(__('Error restore password.'), 'flash/error');
 				}
 			} else {
