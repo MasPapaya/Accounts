@@ -120,9 +120,11 @@ ALTER TABLE users ADD INDEX use_gro_idx (group_id ASC);
 
 CREATE TABLE IF NOT EXISTS user_logs (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  username VARCHAR(45) NOT NULL,
-  ip VARCHAR(15) NOT NULL,
+  is_correct TINYINT(1) NOT NULL,
   created DATETIME NOT NULL,
+  ip VARCHAR(15) NOT NULL,
+  username VARCHAR(45) NOT NULL,
+  user_agent VARCHAR(250) NOT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
