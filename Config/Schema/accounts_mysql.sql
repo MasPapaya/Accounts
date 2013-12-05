@@ -3,11 +3,13 @@
 -- -----------------------------------------------------
 
 
+
 -- -----------------------------------------------------
 -- Drops
 -- -----------------------------------------------------
 
 DROP TABLE IF EXISTS profiles;
+DROP TABLE IF EXISTS docid_types;
 DROP TABLE IF EXISTS user_passwords;
 DROP TABLE IF EXISTS alternate_logins;
 DROP TABLE IF EXISTS social_networks;
@@ -44,6 +46,18 @@ CREATE TABLE IF NOT EXISTS groups (
 
 
 -- -----------------------------------------------------
+-- Table docid_types
+-- -----------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS docid_types (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(45) NOT NULL,
+  alias VARCHAR(45) NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table profiles
 -- -----------------------------------------------------
 
@@ -51,6 +65,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id INT UNSIGNED NOT NULL,
   location_id INT UNSIGNED NOT NULL,
+  docid_type_id INT UNSIGNED NOT NULL,
   first_name VARCHAR(45) NOT NULL,
   last_name VARCHAR(45) NOT NULL,
   docid VARCHAR(45) NOT NULL,
@@ -64,6 +79,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 ALTER TABLE profiles ADD INDEX pro_use_idx (user_id ASC);
 ALTER TABLE profiles ADD INDEX pro_loc_idx (location_id ASC);
+ALTER TABLE profiles ADD INDEX pro_doctyp_idx (docid_type_id ASC);
 
 
 -- -----------------------------------------------------
@@ -106,7 +122,6 @@ CREATE TABLE IF NOT EXISTS user_logs (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   username VARCHAR(45) NOT NULL,
   ip VARCHAR(15) NOT NULL,
-  user_agent VARCHAR(45) NOT NULL,
   created DATETIME NOT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB;
@@ -145,6 +160,10 @@ ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 ALTER TABLE profiles ADD
 CONSTRAINT pro_use_fx FOREIGN KEY (user_id) REFERENCES users (id)
+ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE profiles ADD
+CONSTRAINT pro_doctyp_fx FOREIGN KEY (docid_type_id) REFERENCES docid_types (id)
 ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 ALTER TABLE users ADD
