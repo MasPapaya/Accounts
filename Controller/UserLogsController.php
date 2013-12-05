@@ -11,26 +11,10 @@ class UserLogsController extends AccountsAppController {
 
 	public function beforeFilter() {
 		parent::beforeFilter();
+		if (Configure::read('debug') > 1) {
+			$this->Auth->allow();
+		}
 	}
-
-// 	public function isAuthorized() {
-// //		parent::isAuthorized();
-// 		switch ($this->Auth->user('group_id')) {
-// 			case 1:
-// 			case 2:
-// 				return true;
-// 				break;
-// 			case 3:
-// 				return false;
-// 				break;
-// 			case 4:
-// 				return false;
-// 				break;
-// 			default :
-// 				return false;
-// 				break;
-// 		}
-// 	}
 
 	/**
 	 * index method
@@ -39,6 +23,9 @@ class UserLogsController extends AccountsAppController {
 	 */
 	public function admin_index() {
 		$this->UserLog->recursive = 0;
+		$this->paginate = array(
+			'order' => array('UserLog.created' => 'desc')
+		);
 		$this->set('userLogs', $this->paginate());
 	}
 
