@@ -97,11 +97,7 @@ class UsersController extends AccountsAppController {
 					if (Configure::read('Accounts.add.send.email')) {
 						$this->__send_email($this->request->data['User']['username'], $this->request->data['User']['password'], $this->request->data['User']['email']);
 					}
-					$this->User->UserPassword->create(array(
-						'user_id' => $this->User->id,
-						'password' => $this->request->data['User']['password']
-					));
-					$this->User->UserPassword->save();
+
 					$this->Session->setFlash(__('The user has been saved'), 'flash/success');
 					$this->redirect(array('action' => 'index'));
 				} else {
@@ -153,13 +149,6 @@ class UsersController extends AccountsAppController {
 				}
 				$this->User->validator()->remove('password', 'regexp');
 				if ($this->User->save($this->request->data)) {
-					if (isset($this->request->data['User']['password'])) {
-						$this->User->UserPassword->create(array(
-							'user_id' => $this->request->data['User']['id'],
-							'password' => $this->request->data['User']['password']
-						));
-						$this->User->UserPassword->save();
-					}
 					$this->Session->setFlash(__('The user has been saved'), 'flash/success');
 					$this->redirect(array('action' => 'index', 'admin' => true));
 				} else {
@@ -507,13 +496,28 @@ class UsersController extends AccountsAppController {
 				));
 
 			if (!empty($user)) {
-				$password = '';
-				$chars = "1234567890abcdABCDEFGHIJKLNMOPQRSTUVWXYZefghijklmnopqrstuvwxyz";
-				for ($i = 0; $i < 10; $i++) {
-					$password .= $chars{rand(0, 35)};
-				}
 
-				$crypted_password = $this->Auth->password($password);
+
+				if (Configure::read('Accounts.user.password.encrypted')) {
+					$password = '';
+					$chars = "1234567890abcdABCDEFGHIJKLNMOPQRSTUVWXYZefghijklmnopqrstuvwxyz";
+					for ($i = 0; $i < 10; $i++) {
+						$password .= $chars{rand(0, 35)};
+					}
+					$crypted_password = $this->Auth->password($password);
+				} else {
+					$this->loadModel('Accounts.UserPassword');
+					$password_old = $this->UserPassword->find('first', array(
+//						'fields' => array('UserPassword.*'),
+						'order' => array('UserPassword.created' => 'desc'),
+						'conditions' => array('user_id' => $user['User']['id'])
+						));
+					if (empty($password_old)) {
+						throw new MethodNotAllowedException('Error UserPassword');
+					}
+					$crypted_password = $this->Auth->password($password_old['UserPassword']['password']);
+					$password = $password_old['UserPassword']['password'];
+				}
 
 				if ($this->User->updateAll(array('User.password' => "'" . $crypted_password . "'"), array('User.id' => $user['User']['id']))) {
 
@@ -523,7 +527,7 @@ class UsersController extends AccountsAppController {
 
 					$this->Session->setFlash(__('A new password has been sent to your email.'), 'flash/success');
 					$this->redirect('/');
-				} else {					
+				} else {
 					$this->Session->setFlash(__('Error restore password.'), 'flash/error');
 				}
 			} else {

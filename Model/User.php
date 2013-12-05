@@ -1,4 +1,5 @@
 <?php
+
 App::uses('AppModel', 'Model');
 
 /**
@@ -76,7 +77,7 @@ class User extends AccountsAppModel {
 				'allowEmpty' => TRUE,
 			//'required' => false,
 			//'last' => false, // Stop validation after this rule
-			// 'on' => 'create', // Limit validation to 'create' or 'update' operations
+//			 'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 			'not_used_pass' => array(
 				'rule' => array('not_used_pass'),
@@ -236,7 +237,11 @@ class User extends AccountsAppModel {
 			unset($this->data['User']['password']);
 			unset($this->data['User']['password_2']);
 		} else {
-			
+			if (Configure::read('Accounts.user.password.encrypted')) {
+				Configure::write('save_password', AuthComponent::password($this->data['User']['password']));
+			} else {
+				Configure::write('save_password', $this->data['User']['password']);
+			}
 			$this->data['User']['password'] = AuthComponent::password($this->data['User']['password']);
 		}
 		return TRUE;
@@ -248,10 +253,11 @@ class User extends AccountsAppModel {
 			$userpass = new UserPassword();
 			$obj = array(
 				'user_id' => $this->data['User']['id'],
-				'password' => $this->data['User']['password'],
+				'password' => Configure::read('save_password'),
 				'created' => date('Y-m-d H:i:s')
 			);
 			$userpass->save($obj);
+			Configure::delete('save_password');
 		}
 		return TRUE;
 	}
