@@ -45,6 +45,7 @@ $this->Html->css(array(
 					echo $this->Form->input('Profile.location_id', array('options' => $locations, 'default' => 'empty', 'empty' => 'Seleccione un Pais'));
 				}
 				echo $this->Form->input('Profile.address');
+				echo $this->Form->input('Profile.docid_type_id', array('options' => $doctypes, 'default' => 'empty', 'empty' => __('Select Docid Type')));
 				echo $this->Form->input('Profile.docid');
 				echo $this->Form->input('Profile.phone');
 				echo $this->Form->input('Profile.mobile');

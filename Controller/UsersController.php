@@ -289,6 +289,7 @@ class UsersController extends AccountsAppController {
 		$this->loadModel('Accounts.Profile');
 		$this->loadModel('Configurations.Location');
 
+
 		if (Configure::read('Accounts.register.data') == 'attributes' || Configure::read('Accounts.register.data') == 'both') {
 			$attr = $this->Attribute->getTypes('user');
 			$this->set('attrs', $attr);
@@ -446,8 +447,8 @@ class UsersController extends AccountsAppController {
 				$locations = $this->Location->find('list');
 			}
 		}
-
-		$this->set(compact('locations'));
+		$doctypes = $this->Profile->DocidType->find('list', array('fields' => array('id', 'name')));
+		$this->set(compact('locations', 'doctypes'));
 
 		if (!empty($this->request->data)) {
 			// $this->request->data['User']['password'] = '';
@@ -643,7 +644,8 @@ class UsersController extends AccountsAppController {
 			} else {
 				$locations = $this->Location->find('list');
 			}
-			$this->set(compact('locations'));
+			$doctypes = $this->Profile->DocidType->find('list', array('fields' => array('id', 'name')));
+			$this->set(compact('locations', 'doctypes'));
 		} else {
 			$this->Session->setFlash(__('No user session.'), 'flash/warning');
 			$this->redirect('/');

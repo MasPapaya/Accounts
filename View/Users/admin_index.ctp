@@ -15,7 +15,7 @@
 			<th><?php echo $this->Paginator->sort('username'); ?></th>
 			<th><?php echo $this->Paginator->sort('group_id'); ?></th>
 			<th><?php echo $this->Paginator->sort('email'); ?></th>
-			<th><?php echo $this->Paginator->sort('deleted'); ?></th>
+			<th><?php echo $this->Paginator->sort('Actions'); ?></th>
 
 		</tr>
 		<?php foreach ($users as $user): ?>

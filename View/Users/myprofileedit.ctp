@@ -17,6 +17,7 @@
 		}
 
 		echo $this->Form->input('Profile.address');
+		echo $this->Form->input('Profile.docid_type_id', array('options' => $doctypes, 'default' => 'empty', 'empty' => __('Select Docid Type')));
 		echo $this->Form->input('Profile.docid');
 		echo $this->Form->input('Profile.phone');
 		echo $this->Form->input('Profile.mobile');

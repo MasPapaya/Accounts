@@ -34,7 +34,16 @@ class Profile extends AccountsAppModel {
 			//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 		),
-
+		'docid_type_id' => array(
+			'numeric' => array(
+				'rule' => array('numeric'),
+			//'message' => 'Your custom message here',
+			//'allowEmpty' => false,
+			//'required' => false,
+			//'last' => false, // Stop validation after this rule
+			//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		),
 		'first_name' => array(
 			'notempty' => array(
 				'rule' => array('notempty'),
@@ -167,6 +176,13 @@ class Profile extends AccountsAppModel {
 		'Location' => array(
 			'className' => 'Location',
 			'foreignKey' => 'location_id',
+			'conditions' => '',
+			'fields' => '',
+			'order' => ''
+		),
+		'DocidType' => array(
+			'className' => 'Accounts.DocidType',
+			'foreignKey' => 'docid_type_id',
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
