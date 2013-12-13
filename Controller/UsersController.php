@@ -14,7 +14,7 @@ require_once ROOT . DS . 'app' . DS . 'Plugin' . DS . 'Accounts' . DS . 'Vendor'
 class UsersController extends AccountsAppController {
 
 	public $helpers = array();
-	public $uses = array();
+	public $uses = array('Accounts.User');
 	var $components = array();
 
 	function beforeFilter() {
@@ -639,8 +639,12 @@ class UsersController extends AccountsAppController {
 				$this->request->data = $profile;
 			}
 			if (Configure::read('Configuration.location.tree')) {
-				$this->request->data['Profile']['location_id'] = array_reverse($this->Location->load_parent($this->request->data['Profile']['location_id']));
-				$locations = $this->Location->sections($this->request->data['Profile']['location_id']);
+				if (!empty($this->request->data['Profile']['location_id'])) {
+					$this->request->data['Profile']['location_id'] = array_reverse($this->Location->load_parent($this->request->data['Profile']['location_id']));
+					$locations = $this->Location->sections($this->request->data['Profile']['location_id']);
+				} else {
+					$locations = $this->Location->sections(array(0 => null));
+				}
 			} else {
 				$locations = $this->Location->find('list');
 			}
@@ -654,6 +658,98 @@ class UsersController extends AccountsAppController {
 
 	public function myattributesedit() {
 		
+	}
+
+	public function editall() {
+		if (!empty($this->authuser)) {
+			$this->loadModel('Accounts.Profile');
+			$this->loadModel('Configurations.Location');
+
+			$profile = $this->Profile->find('first', array('conditions' => array('user_id' => $this->authuser['id'])));
+			if (empty($profile)) {
+				throw new MethodNotAllowedException();
+			}
+			$attr = $this->Attribute->getTypes('user', 'create');
+			$this->set('attrs', $attr);
+			if ($this->request->is('post') || $this->request->is('put')) {
+
+				$this->User->set($this->request->data);
+				$this->Profile->set($this->request->data);
+
+				if ($this->Attribute->validate($attr, $this->request->data)) {
+					/* ====== LOCATION ========= */
+					if (Configure::read('Configuration.location.tree')) {
+						$locations = $this->Location->sections($this->request->data['Profile']['location_id']);
+						$locations_post = $this->request->data['Profile']['location_id'];
+						$this->request->data['Profile']['location_id'] = end($this->request->data['Profile']['location_id']);
+					}
+					/* ====== LOCATION ========= */
+
+					if ($this->Profile->save($this->request->data)) {
+						/* ===CODE APP CONCTELERIA== */
+						$this->loadModel('CocteleriaProfile');
+						$profile_cocteleria['CocteleriaProfile']['id'] = $profile['Profile']['id'];
+						$profile_cocteleria['CocteleriaProfile']['name'] = $this->request->data['Profile']['first_name'];
+						$profile_cocteleria['CocteleriaProfile']['lastname'] = $this->request->data['Profile']['last_name'];
+						$profile_cocteleria['CocteleriaProfile']['country_id'] = $this->request->data['Profile']['location_id'];
+						$this->CocteleriaProfile->save($profile_cocteleria);
+						/* ===CODE APP CONCTELERIA== */
+						unset($this->request->data['User']['username']);
+						unset($this->request->data['User']['email']);
+						if ($this->User->save($this->request->data)) {
+							/* ===CODE APP CONCTELERIA== */
+							$this->loadModel('CocteleriaUser');
+							$user['CocteleriaUser']['id'] = $this->authuser['id'];
+							if (!empty($this->request->data['User']['password_2'])) {
+								$user['CocteleriaUser']['password'] = $this->Auth->password($this->request->data['User']['password_2']);
+							}
+							$this->CocteleriaUser->save($user);
+							/* ===CODE APP CONCTELERIA== */
+							if ($this->Attribute->validate($attr, $this->request->data)) {
+								$this->Attribute->edit($this->request->data['AttributeType'], $this->authuser['id'], 'user');
+							} else {
+								$this->Session->setFlash(__('The user has been saved'), 'flash/success');
+							}
+							$this->Session->setFlash(__('The user has been saved'), 'flash/success');
+						} else {
+							$this->Session->setFlash(__('The user could not be saved. Please, try again.'), 'flash/error');
+						}
+						unset($this->request->data['User']['password']);
+						unset($this->request->data['User']['password_2']);
+						$this->Session->setFlash(__('The profile has been saved.'), 'flash/success');
+						//$this->redirect(array('action' => 'myprofile'));
+					} else {
+						$this->Session->setFlash(__('The profile could not be saved. Please, try again.'), 'flash/error');
+					}
+					if (Configure::read('Configuration.location.tree')) {
+						$this->request->data['Profile']['location_id'] = $locations_post;
+					}
+				} else {
+					$this->Session->setFlash(__('The form is no complet'), 'flash/warning');
+				}
+			} else {
+
+				$this->request->data = $profile;
+				unset($this->request->data ['User']['password']);
+				$this->request->data = array_merge($this->request->data, $this->Attribute->getSaved($this->authuser['id'], 'user', 'create')
+				);
+			}
+			if (Configure::read('Configuration.location.tree')) {
+				if (!empty($this->request->data['Profile']['location_id'])) {
+					$this->request->data['Profile']['location_id'] = array_reverse($this->Location->load_parent($this->request->data['Profile']['location_id']));
+					$locations = $this->Location->sections($this->request->data['Profile']['location_id']);
+				} else {
+					$locations = $this->Location->sections(array(0 => null));
+				}
+			} else {
+				$locations = $this->Location->find('list');
+			}
+			$doctypes = $this->Profile->DocidType->find('list', array('fields' => array('id', 'name')));
+			$this->set(compact('locations', 'doctypes'));
+		} else {
+			$this->Session->setFlash(__('No user session.'), 'flash/warning');
+			$this->redirect('/');
+		}
 	}
 
 	public function __send_email($user = null, $password = null, $to = null) {
