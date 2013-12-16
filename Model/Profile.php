@@ -1,6 +1,6 @@
 <?php
 
-App::uses('AppModel', 'Model');
+//App::uses('AppModel', 'Model');
 
 /**
  * Profile Model
@@ -167,7 +167,7 @@ class Profile extends AccountsAppModel {
 	 */
 	public $belongsTo = array(
 		'User' => array(
-			'className' => 'User',
+			'className' => 'Accounts.User',
 			'foreignKey' => 'user_id',
 			'conditions' => '',
 			'fields' => '',

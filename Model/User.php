@@ -1,6 +1,6 @@
 <?php
 
-App::uses('AppModel', 'Model');
+//App::uses('AppModel', 'Model');
 
 /**
  * User Model
@@ -217,7 +217,7 @@ class User extends AccountsAppModel {
 	);
 	public $hasOne = array(
 		'Profile' => array(
-			'className' => 'Profile',
+			'className' => 'Accounts.Profile',
 			'foreignKey' => 'user_id',
 			'dependent' => false,
 			'conditions' => '',

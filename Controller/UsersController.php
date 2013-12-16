@@ -746,6 +746,9 @@ class UsersController extends AccountsAppController {
 			}
 			$doctypes = $this->Profile->DocidType->find('list', array('fields' => array('id', 'name')));
 			$this->set(compact('locations', 'doctypes'));
+			if (CakePlugin::loaded('Resources')) {
+				$this->helpers[] = 'Resources.Frame';
+			}
 		} else {
 			$this->Session->setFlash(__('No user session.'), 'flash/warning');
 			$this->redirect('/');
