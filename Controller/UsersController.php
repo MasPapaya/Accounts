@@ -755,6 +755,32 @@ class UsersController extends AccountsAppController {
 		}
 	}
 
+	public function changepicture($session = NULL, $group_type = 'picture') {
+		$this->layout = false;
+		$this->loadModel('ViewResource');
+		$picture = $this->ViewResource->find('first', array(
+			'order' => array('created' => 'desc'),
+			'conditions' => array(
+				'entity_alias' => 'user',
+				'group_type_alias' => $group_type,
+				'parent_entityid' => $this->authuser['id'],
+				'deleted' => Configure::read('zero_datetime'),
+			),
+			'fields' => array('filename', 'entity_folder', 'name')
+			)
+		);
+		if ($session == 'picture') {
+			if (!empty($picture)) {
+				$this->Session->write($session, $picture['ViewResource']);
+			} else {
+				$this->Session->delete($session);
+			}
+		} else {
+			$this->set(compact('picture'));
+		}
+		$this->set(compact('session'));
+	}
+
 	public function __send_email($user = null, $password = null, $to = null) {
 		$email = new CakeEmail('smtp'); // Definirlo con variable de configuracion
 		$email->viewVars(array('user' => $user, 'password' => $password));
