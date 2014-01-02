@@ -25,9 +25,9 @@
 					<td>
 						<div class="btn-group">
 							<?php echo $this->Html->link('<i class="icon-pencil"></i>', array('action' => 'edit', $group['Group']['id']), array('escape' => FALSE, 'class' => 'btn')) ?>							
-							<?php echo $this->Html->link('<i class="icon-eye-open"></i>', array('action' => 'view', $group['Group']['id']), array('escape' => FALSE, 'class' => 'btn')) ?>							
+							<?php //echo $this->Html->link('<i class="icon-eye-open"></i>', array('action' => 'view', $group['Group']['id']), array('escape' => FALSE, 'class' => 'btn')) ?>							
 							<?php
-							echo $this->Form->postLink('<i class="icon-trash icon-white"></i>', array('action' => 'delete', $group['Group']['id']), array('class' => 'btn btn-danger', 'escape' => FALSE), __('Are you sure you want to delete # %s?', $group['Group']['name']));							
+							echo $this->Form->postLink('<i class="icon-trash icon-white"></i>', array('action' => 'delete', $group['Group']['id']), array('class' => 'btn btn-danger', 'escape' => FALSE), __('Are you sure you want to delete # %s?', $group['Group']['name']));
 							?>
 						</div>
 					</td>

@@ -42,7 +42,7 @@ class DocidTypesController extends AccountsAppController {
 	 */
 	public function admin_view($id = null) {
 		if (!$this->DocidType->exists($id)) {
-			throw new NotFoundException(__('Invalid docid type'));
+			throw new NotFoundException(__('Invalid docid type.'));
 		}
 		$options = array('conditions' => array('DocidType.' . $this->DocidType->primaryKey => $id));
 		$this->set('docidType', $this->DocidType->find('first', $options));
