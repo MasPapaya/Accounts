@@ -19,7 +19,7 @@ if (Configure::read('Accounts.social_networks_enabled')) {
 		<?php echo $this->Form->create('User', array('class' => 'form')); ?>
 		<fieldset>
 
-			<legend>Iniciar Sesión</legend>
+			<legend><?php echo __('Login')?></legend>
 			<?php
 			echo $this->Form->input('username', array('label' => __('User')));
 			echo $this->Form->input('password', array('label' => __('Password')));

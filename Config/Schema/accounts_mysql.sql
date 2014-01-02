@@ -175,3 +175,35 @@ ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE user_passwords ADD
 CONSTRAINT usepas_use_fk FOREIGN KEY (user_id) REFERENCES users (id)
 ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+
+-- -----------------------------------------------------
+-- Constraints
+-- -----------------------------------------------------
+
+CREATE  OR REPLACE VIEW  view_user_infos AS 
+SELECT user.id AS user_id,
+user.group_id AS group_id,
+profile.first_name AS first_name,
+profile.last_name AS last_name,
+profile.docid AS docid,
+profile.gender AS gender,
+profile.birthday AS birthday,
+profile.address AS address,
+profile.mobile AS mobile,
+profile.phone AS phone,
+user.web AS web,
+user.username AS username,
+user.email AS email,
+groups.name AS group_name,
+user.activated AS activated,
+user.banned AS banned,
+user.deleted AS deleted,
+profile.location_id AS location_id,
+location.name AS location_name,
+location.latitude AS latitude,
+location.longitude AS longitude,
+location.is_capital AS is_capital 
+FROM users user LEFT JOIN profiles profile ON profile.user_id = user.id 
+LEFT JOIN locations location on profile.location_id = location.id 
+LEFT JOIN groups groups ON user.group_id = groups.id;

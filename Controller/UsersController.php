@@ -3,8 +3,8 @@
 App::uses('AppController', 'Controller');
 App::uses('CakeTime', 'Utility');
 /* * *Fin** */
-
-require_once ROOT . DS . 'app' . DS . 'Plugin' . DS . 'Accounts' . DS . 'Vendor' . DS . 'Recaptcha' . DS . 'recaptchalib.php';
+//require_once ROOT . DS . 'app' . DS . 'Plugin' . DS . 'Accounts' . DS . 'Vendor' . DS . 'Recaptcha' . DS . 'recaptchalib.php';
+App::import('Accounts.Vendor', 'Recaptcha/recaptchalib');
 
 /**
  * Users Controller
@@ -22,8 +22,9 @@ class UsersController extends AccountsAppController {
 		if (Configure::read('debug') > 1) {
 			$this->Auth->allow();
 		} else {
-			$this->Auth->allow(array('login', 'register', 'logout', 'goodbye', 'admin_logout', 'remember'));
+			$this->Auth->allow(array('welcome', 'login', 'register', 'logout', 'goodbye', 'admin_logout', 'remember'));
 		}
+
 
 		$this->loadModel('Accounts.User');
 	}
@@ -212,6 +213,12 @@ class UsersController extends AccountsAppController {
 
 				$this->User->recursive = 1;
 				if ($this->Auth->login()) {
+					if (CakePlugin::loaded('MenuManager')) {
+						if ($this->Session->check('set_menu')) {
+							$this->Session->delete('set_menu');
+						}
+					}
+
 					$this->UserLog->create(array(
 						'username' => $this->request->data['User']['username'],
 						'ip' => $this->request->clientIp(),
@@ -228,7 +235,7 @@ class UsersController extends AccountsAppController {
 						$picture = $this->ViewResource->find('first', array(
 							'conditions' => array(
 								'parent_entityid' => $authuser['id'],
-								'group_type_name' => 'picture',
+								'group_type_alias' => 'picture',
 								'entity_alias' => 'user',
 								'deleted' => Configure::read('zero_datetime')
 							),
@@ -257,6 +264,8 @@ class UsersController extends AccountsAppController {
 			} else {
 				$this->Session->setFlash(__('User restricted!'), 'flash/error');
 			}
+		} else {
+			$this->Session->destroy();
 		}
 	}
 
