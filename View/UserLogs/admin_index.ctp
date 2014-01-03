@@ -1,5 +1,5 @@
 
-<div class="span12 user_logs">
+<div class="span12 user_logs title_form">
 	<h2><?php echo __('User Logs'); ?></h2>
 	<?php
 	echo $this->Form->create('UserLog', array('action' => 'search'), array('method' => 'GET', 'class' => 'form-inline'));

@@ -195,7 +195,7 @@ class UsersController extends AccountsAppController {
 	public function login() {
 		$this->loadModel('UserLog');
 		if ($this->Session->read('Auth.User')) {
-			$this->redirect(array('controller' => 'Users', 'action' => 'welcome'));
+			$this->redirect(array('plugin' => 'dashboard', 'controller' => 'Dashboard'));
 		}
 		$this->loadModel('UserLog');
 
