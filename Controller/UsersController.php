@@ -62,18 +62,49 @@ class UsersController extends AccountsAppController {
 	}
 
 	public function admin_add() {
-
+		$this->loadModel('Configurations.Location');
 		if ($this->request->is('post')) {
+			/* ====== LOCATION ========= */
+			if (Configure::read('Configuration.location.tree')) {
+				$array_locations = array_filter($this->request->data['Profile']['location_id']);
+				$locations = $this->Location->sections($this->request->data['Profile']['location_id']);
+				$locations_post = $this->request->data['Profile']['location_id'];
+				$this->request->data['Profile']['location_id'] = end($array_locations);
+			}
+
+			if (empty($this->request->data['Profile']['location_id'])) {
+				unset($this->request->data['Profile']['location_id']);
+			}
+			/* ====== LOCATION ========= */
 			$this->User->create();
 
 			$this->User->set($this->request->data);
+			$this->User->Profile->set($this->request->data);
 			$this->User->validator()->remove('accept_terms');
-			if ($this->User->validates()) {
+			if ($this->User->validates() && $this->User->Profile->validates()) {
 				// $this->request->data['User']['password'] = $this->Auth->password($this->request->data['User']['password']);
 				$this->request->data['User']['banned'] = Configure::read('zero_datetime');
 				$this->request->data['User']['deleted'] = Configure::read('zero_datetime');
 
 				if ($this->User->save($this->request->data, false)) {
+					$this->loadModel('CocteleriaUser');
+					$user_data['CocteleriaUser']['username'] = $this->request->data['User']['username'];
+					$user_data['CocteleriaUser']['password'] = $this->Auth->password($this->request->data['User']['password_2']);
+					$user_data['CocteleriaUser']['created'] = date('Y-m-d H:i:s');
+					$user_data['CocteleriaUser']['active'] = 1;
+					$user_data['CocteleriaUser']['banned'] = Configure::read('zero_datetime');
+					$user_data['CocteleriaUser']['deleted'] = Configure::read('zero_datetime');
+					$user_data['CocteleriaUser']['group_id'] = $this->request->data['User']['group_id'];
+					$this->CocteleriaUser->save($user_data);
+					$this->request->data['Profile']['user_id'] = $this->User->id;
+					$this->User->Profile->save($this->request->data);
+					$this->loadModel('CocteleriaProfile');
+					$profile_data['CocteleriaProfile']['user_id'] = $this->CocteleriaUser->id;
+					$profile_data['CocteleriaProfile']['name'] = $this->request->data['Profile']['first_name'];
+					$profile_data['CocteleriaProfile']['lastname'] = $this->request->data['Profile']['last_name'];
+					$profile_data['CocteleriaProfile']['country_id'] = $this->request->data['Profile']['location_id'];
+					$this->CocteleriaProfile->save($profile_data);
+
 
 					if (Configure::read('Accounts.register.aros') && CakePlugin::loaded('Acl')) {
 						$this->loadModel('Acl.ManagedAro');
@@ -109,14 +140,23 @@ class UsersController extends AccountsAppController {
 			}
 
 			$this->request->data['User']['password'] = '';
+			if (Configure::read('Configuration.location.tree')) {
+				$this->request->data['Profile']['location_id'] = $locations_post;
+			}
+		} else {
+			if (Configure::read('Configuration.location.tree')) {
+				$locations = $this->Location->sections(array(0 => null));
+			} else {
+				$locations = $this->Location->find('list');
+			}
 		}
 		if ($this->authuser['Group']['name'] == 'superadmin') {
 			$groups = $this->User->Group->find('list');
 		} else {
 			$groups = $this->User->Group->find('list', array('conditions' => array('Group.name !=' => 'superadmin')));
 		}
-
-		$this->set(compact('groups'));
+		$doctypes = $this->User->Profile->DocidType->find('list', array('fields' => array('id', 'name')));
+		$this->set(compact('groups', 'locations', 'doctypes'));
 	}
 
 	public function admin_edit($id = null) {
@@ -193,13 +233,15 @@ class UsersController extends AccountsAppController {
 	}
 
 	public function login() {
+
 		$this->loadModel('UserLog');
 		if ($this->Session->read('Auth.User')) {
 			$this->redirect(array('plugin' => 'dashboard', 'controller' => 'Dashboard'));
 		}
 		$this->loadModel('UserLog');
 
-		if ($this->request->is('post')) {
+		if ($this->request->is('post') || $this->request->is('put')) {
+
 			$attempts = $this->UserLog->find('count', array(
 				'conditions' => array(
 					'UserLog.username' => $this->request->data['User']['username'],
@@ -211,11 +253,14 @@ class UsersController extends AccountsAppController {
 
 			if ($attempts < 10) {
 
-				$this->User->recursive = 1;
+
+				$this->User->recursive = 2;
 				if ($this->Auth->login()) {
+
 					if (CakePlugin::loaded('MenuManager')) {
 						if ($this->Session->check('set_menu')) {
 							$this->Session->delete('set_menu');
+							$this->Session->delete('menu_options');
 						}
 					}
 
@@ -230,7 +275,9 @@ class UsersController extends AccountsAppController {
 
 					if (CakePlugin::loaded('Resources') && Configure::read('Accounts.profile.picture') == TRUE) {
 						$this->loadModel('Resources.ViewResource');
+						
 						$authuser = $this->Auth->user();
+						pr($authuser);
 						$this->ViewResource->recursive = -1;
 						$picture = $this->ViewResource->find('first', array(
 							'conditions' => array(
@@ -248,7 +295,7 @@ class UsersController extends AccountsAppController {
 						}
 					}
 
-					$this->redirect($this->Auth->redirectUrl());
+					//$this->redirect($this->Auth->redirectUrl());
 				} else {
 					$this->UserLog->create(array(
 						'username' => $this->request->data['User']['username'],

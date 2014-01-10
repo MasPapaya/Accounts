@@ -1,5 +1,6 @@
 <div class="users">
 	<?php echo $this->Html->link('<i class="icon-plus-sign icon-white"></i>&nbsp;' . __('New User'), array('action' => 'add', 'admin' => true), array('class' => 'btn btn-primary', 'escape' => FALSE)); ?>
+
 	<div>
 		<h2><?php echo __('Users'); ?></h2>
 		<table class="table table-striped table-bordered table-condensed">

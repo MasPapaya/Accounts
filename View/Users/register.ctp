@@ -110,7 +110,7 @@ $this->Html->css(array(
 		?>
 	</div>
 	<div>
-		<?php echo $this->Form->submit(__('Submit'), array('class' => 'btn btn-primary')); ?>
+		<?php echo $this->Form->submit(__('Save'), array('class' => 'btn btn-primary')); ?>
 	</div>
 
 	<?php echo $this->Form->end(); ?>
