@@ -26,7 +26,7 @@
 		if (Configure::read('Configuration.location.tree')) {
 			echo $this->Locations->input('Profile', $locations);
 		} else {
-			pr('ola2');
+			
 			echo $this->Form->input('Profile.location_id', array('options' => $locations, 'default' => 'empty', 'empty' => 'Seleccione un Pais'));
 		}
 //		echo $this->Form->input('Profile.address');
