@@ -2,7 +2,7 @@
 	<div class="btn-options">
 		<?php echo $this->Html->link('<i class="icon-list icon-white"></i>&nbsp;' . __('Back to List'), array('action' => 'index', 'admin' => true), array('class' => 'btn btn-primary', 'escape' => FALSE)); ?>	
 	</div>
-	<h2><?php echo __('User'); ?></h2>
+	<h2><?php echo __d('accounts', 'User'); ?></h2>
 	<dl>
 		<dt><?php echo __('Id'); ?></dt>
 		<dd>

@@ -4,7 +4,7 @@
 	</div>
 	<?php echo $this->Form->create('DocidType'); ?>
 	<fieldset>
-		<legend><?php echo __('Edit Docid Type'); ?></legend>
+		<legend><?php echo __d('accounts','Edit Docid Type'); ?></legend>
 		<?php
 		echo $this->Form->input('id');
 		echo $this->Form->input('name');

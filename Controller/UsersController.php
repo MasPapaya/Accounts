@@ -14,24 +14,20 @@ App::import('Accounts.Vendor', 'Recaptcha/recaptchalib');
 class UsersController extends AccountsAppController {
 
 	public $helpers = array();
-	public $uses = array('Accounts.User');
+//	public $uses = array('Accounts.User');
 	var $components = array();
 
-	function beforeFilter() {
+	public function beforeFilter() {
 		parent::beforeFilter();
 		if (Configure::read('debug') > 1) {
 			$this->Auth->allow();
 		} else {
 			$this->Auth->allow(array('welcome', 'login', 'register', 'logout', 'goodbye', 'admin_logout', 'remember'));
 		}
-
-
 		$this->loadModel('Accounts.User');
 	}
 
-	public function beforeRender() {
-		$this->set('actions', $this->Auth->allowedActions);
-	}
+
 
 	public function admin_index() {		
 		$this->User->recursive = 1;
@@ -247,6 +243,7 @@ class UsersController extends AccountsAppController {
 					if (CakePlugin::loaded('MenuManager')) {
 						if ($this->Session->check('set_menu')) {
 							$this->Session->delete('set_menu');
+							$this->Session->delete('menu_options');
 						}
 					}
 

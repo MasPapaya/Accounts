@@ -1,7 +1,7 @@
 <div class="DocidTypes">
-	<?php echo $this->Html->link('<i class="icon-plus-sign icon-white"></i>&nbsp;' . __('New Docid Type'), array('action' => 'add', 'admin' => true), array('class' => 'btn btn-primary', 'escape' => FALSE)); ?>
+	<?php echo $this->Html->link('<i class="icon-plus-sign icon-white"></i>&nbsp;' . __d('accounts','New Docid Type'), array('action' => 'add', 'admin' => true), array('class' => 'btn btn-primary', 'escape' => FALSE)); ?>
 	<div>
-		<h2><?php echo __('Docid Types'); ?></h2>
+		<h2><?php echo __d('accounts','Docid Types'); ?></h2>
 		<table class="table table-striped table-bordered table-condensed">
 			<tr>
 				<th><?php echo $this->Paginator->sort('id'); ?></th>

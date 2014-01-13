@@ -4,20 +4,14 @@
 	</div>
 	<?php echo $this->Form->create('User'); ?>
 	<fieldset>
-		<legend><?php echo __('Edit User'); ?></legend>
+		<legend><?php echo __d('accounts','Edit User'); ?></legend>
 		<?php
 		echo $this->Form->input('id');
 		echo $this->Form->input('group_id');
 		echo $this->Form->input('username', array('type' => 'text', 'disabled' => 'disabled'));
 		echo $this->Form->input('password', array('required' => false));
-		echo $this->Form->input('password_2', array('label' => __('Repeat Password'), 'type' => 'password', 'required' => false));
-//		echo $this->Form->input('fbid', array('type'=>'text','disabled'=>'disabled'));
-//		echo $this->Form->input('twid', array('type'=>'text','disabled'=>'disabled'));
+		echo $this->Form->input('password_2', array('label' => __d('accounts', 'Repeat Password'), 'type' => 'password', 'required' => false));
 		echo $this->Form->input('email', array('type' => 'text', 'disabled' => 'disabled'));
-//		echo $this->Form->input('birthday',array('type'=>'hidden','value'=>'1970-01-01'));
-//		echo $this->Form->input('activated',array('type'=>'hidden','value'=>'1970-01-01 00:00:00'));
-//		echo $this->Form->input('banned',array('type'=>'hidden','value'=>'1970-01-01 00:00:00'));
-//		echo $this->Form->input('deleted',array('type'=>'hidden','value'=>'1970-01-01 00:00:00'));
 		?>
 	</fieldset>
 	<?php echo $this->Form->end(array('label' => __('Save'), 'class' => 'btn btn-primary')); ?>

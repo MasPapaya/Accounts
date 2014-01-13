@@ -4,7 +4,7 @@
 	</div>
 	<?php echo $this->Form->create('Group'); ?>
 	<fieldset>
-		<legend><?php echo __('Admin Add Group'); ?></legend>
+		<legend><?php echo __d('accounts','Edit Group'); ?></legend>
 		<?php
 		echo $this->Form->input('id');
 		echo $this->Form->input('name');

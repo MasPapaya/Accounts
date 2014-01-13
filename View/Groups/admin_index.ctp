@@ -1,7 +1,7 @@
 <div class="groups">
-	<?php echo $this->Html->link('<i class="icon-plus-sign icon-white"></i>&nbsp;' . __('New Group'), array('action' => 'add', 'admin' => true), array('class' => 'btn btn-primary', 'escape' => FALSE)); ?>
+	<?php echo $this->Html->link('<i class="icon-plus-sign icon-white"></i>&nbsp;' . __d('accounts','New Group'), array('action' => 'add', 'admin' => true), array('class' => 'btn btn-primary', 'escape' => FALSE)); ?>
 	<div>
-		<h2><?php echo __('Groups'); ?></h2>
+		<h2><?php echo __d('accounts','Groups'); ?></h2>
 		<table class="table table-striped table-bordered table-condensed">
 			<thead>
 				<tr>

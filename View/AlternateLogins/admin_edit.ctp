@@ -9,8 +9,8 @@
 
 <div class="span8">
 	<?php echo $this->Form->create('AlternateLogin'); ?>
-	<fieldset>
-		<legend><?php echo __('Edit Alternate Login'); ?></legend>
+	<fieldset>		
+		<legend><?php echo __d('accounts', 'Edit Alternate Login'); ?></legend>
 		<?php
 		echo $this->Form->input('id');
 		echo $this->Form->input('user_id');

@@ -1,6 +1,6 @@
 
 <div class="span12 user_logs title_form">
-	<h2><?php echo __('User Logs'); ?></h2>
+	<h2><?php echo __d('accounts','User Logs'); ?></h2>
 	<?php
 	echo $this->Form->create('UserLog', array('action' => 'search'), array('method' => 'GET', 'class' => 'form-inline'));
 	echo '<div class="input-append">';
@@ -16,8 +16,7 @@
 				<th><?php echo $this->Paginator->sort('username'); ?></th>
 				<th><?php echo $this->Paginator->sort('ip'); ?></th>
 				<th><?php echo $this->Paginator->sort('user_agent'); ?></th>
-				<th><?php echo $this->Paginator->sort('created'); ?></th>
-				<!--<th class="actions"><?php echo __('Actions'); ?></th>-->
+				<th><?php echo $this->Paginator->sort('created'); ?></th>				
 			</tr>
 		</thead>
 		<tbody>
@@ -28,17 +27,6 @@
 					<td><?php echo h($userLog['UserLog']['ip']); ?>&nbsp;</td>
 					<td><?php echo h($userLog['UserLog']['user_agent']); ?>&nbsp;</td>
 					<td><?php echo h($userLog['UserLog']['created']); ?>&nbsp;</td>
-	<!--					<td class="actions">
-						<div class="btn-group">
-					<?php echo $this->Ajs->button('icon-pencil', array('action' => 'edit', $userLog['UserLog']['id']), '', '#primary-ajax') ?>							
-					<?php echo $this->Ajs->button('icon-eye-open', array('action' => 'view', $userLog['UserLog']['id']), '', '#primary-ajax') ?>							
-					<?php
-					echo $this->Ajs->delete(
-						'<i class="icon-trash icon-white"></i>', array('action' => 'delete', $userLog['UserLog']['id']), array('escape' => false, 'class' => 'btn btn-danger'), array('update' => '#primary-ajax', 'confirm' => __('Are you sure you want to delete \" %s \"?', $userLog['UserLog']['id']))
-					);
-					?>
-						</div>
-					</td>-->
 				</tr>
 			<?php endforeach; ?>
 		</tbody>

@@ -2,13 +2,13 @@
 	<div class="well">
 		<ul class="nav nav-list">
 			<li class="nav-header"><h3><?php echo __('Actions'); ?></h3></li>
-			<li><?php echo $this->Ajs->link('<i class="icon-plus-sign"></i>&nbsp;' . __('New Alternate Login'), array('action' => 'add'), '', '#primary-ajax'); ?></li>
+			<li><?php echo $this->Ajs->link('<i class="icon-plus-sign"></i>&nbsp;' . __d('accounts', 'New Alternate Login'), array('action' => 'add'), '', '#primary-ajax'); ?></li>
 		</ul>
 	</div>
 </div>
 
 <div class="span8">
-	<h2><?php echo __('Alternate Logins'); ?></h2>
+	<h2><?php echo __d('accounts', 'Alternate Logins'); ?></h2>
 	<table class="table table-condensed table-bordered table-striped">
 		<thead>
 			<tr>
@@ -54,7 +54,7 @@
 			//'before' => $this->Js->get('#busy-indicator')->effect('fadeIn', array('buffer' => false)),
 			//'complete' => $this->Js->get('#busy-indicator')->effect('fadeOut', array('buffer' => false)),
 			)
-		);		
+		);
 		?>
 	</p>
 	<div class="pagination pagination-centered">

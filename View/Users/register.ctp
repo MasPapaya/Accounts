@@ -17,13 +17,13 @@ $this->Html->css(array(
 
 
 	<fieldset class="user-data">
-		<legend><?php echo __('User Data'); ?></legend>
+		<legend><?php echo __d('accounts','User Data'); ?></legend>
 
 		<?php
 		echo $this->Form->input('email');
 		echo $this->Form->input('username');
 		echo $this->Form->input('password');
-		echo $this->Form->input('password_2', array('label' => __('Repeat Password'), 'type' => 'password'));
+		echo $this->Form->input('password_2', array('label' => __d('accounts','Repeat Password'), 'type' => 'password'));
 		?>
 	</fieldset>
 
@@ -32,11 +32,11 @@ $this->Html->css(array(
 
 		<?php if (Configure::read('Accounts.register.data') == 'both' || Configure::read('Accounts.register.data') == 'profile'): ?>
 			<fieldset class="user-profile">
-				<legend><?php echo __('User Profile'); ?></legend>
+				<legend><?php echo __d('accounts','Profile Data'); ?></legend>
 
 				<?php
-				echo $this->Form->input('Profile.first_name');
-				echo $this->Form->input('Profile.last_name');
+				echo $this->Form->input('Profile.first_name',array('label'=>__d('accounts','First Name')));
+				echo $this->Form->input('Profile.last_name',array('label'=>__d('accounts','Last Name')));
 				echo __('Gender') . '<br/>';
 				echo $this->Form->input('Profile.gender', array('type' => 'radio', 'options' => array('M' => __('Male'), 'F' => __('Female')), 'legend' => false));
 				if (Configure::read('Configuration.location.tree')) {
@@ -58,7 +58,7 @@ $this->Html->css(array(
 
 		<?php if (Configure::read('Accounts.register.data') == 'both' || Configure::read('Accounts.register.data') == 'attributes'): ?>
 			<fieldset class="user-attributes">
-				<legend><?php echo __('User Attributes'); ?></legend>
+				<legend><?php echo __d('accounts','User Attributes'); ?></legend>
 				<?php echo $this->Attribute->inputs($attrs); ?>
 			</fieldset>
 		<?php endif; ?>
