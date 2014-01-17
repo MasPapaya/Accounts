@@ -78,31 +78,12 @@ class UsersController extends AccountsAppController {
 			$this->User->Profile->set($this->request->data);
 			$this->User->validator()->remove('accept_terms');
 			if ($this->User->validates() && $this->User->Profile->validates()) {
-				// $this->request->data['User']['password'] = $this->Auth->password($this->request->data['User']['password']);
 				$this->request->data['User']['banned'] = Configure::read('zero_datetime');
 				$this->request->data['User']['deleted'] = Configure::read('zero_datetime');
-
-				if ($this->User->save($this->request->data, false)) {
-
-					$this->loadModel('CocteleriaUser');
-					$user_data['CocteleriaUser']['username'] = $this->request->data['User']['username'];
-					$user_data['CocteleriaUser']['password'] = $this->Auth->password($this->request->data['User']['password_2']);
-					$user_data['CocteleriaUser']['created'] = date('Y-m-d H:i:s');
-					$user_data['CocteleriaUser']['active'] = 1;
-					$user_data['CocteleriaUser']['banned'] = Configure::read('zero_datetime');
-					$user_data['CocteleriaUser']['deleted'] = Configure::read('zero_datetime');
-					$user_data['CocteleriaUser']['group_id'] = $this->request->data['User']['group_id'];
-					$this->CocteleriaUser->save($user_data);
+				if ($this->User->save($this->request->data, false)) {					
+					
 					$this->request->data['Profile']['user_id'] = $this->User->id;
-					$this->User->Profile->save($this->request->data);
-					$this->loadModel('CocteleriaProfile');
-					$profile_data['CocteleriaProfile']['user_id'] = $this->CocteleriaUser->id;
-					$profile_data['CocteleriaProfile']['name'] = $this->request->data['Profile']['first_name'];
-					$profile_data['CocteleriaProfile']['lastname'] = $this->request->data['Profile']['last_name'];
-					$profile_data['CocteleriaProfile']['country_id'] = $this->request->data['Profile']['location_id'];
-					$this->CocteleriaProfile->save($profile_data);
-
-
+					$this->User->Profile->save($this->request->data);								
 
 					if (Configure::read('Accounts.register.aros') && CakePlugin::loaded('Acl')) {
 						$this->loadModel('Acl.ManagedAro');
@@ -851,7 +832,7 @@ class UsersController extends AccountsAppController {
 					$this->Session->setFlash('No se encontraron Registros!.', 'flash/warning');
 				}
 				$this->set('users', $results);
-			}else{
+			} else {
 				$this->Session->setFlash('No se encontraron Registros!.', 'flash/warning');
 				$this->redirect(array('action' => 'index'));
 			}
