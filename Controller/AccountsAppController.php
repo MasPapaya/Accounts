@@ -62,7 +62,7 @@ class AccountsAppController extends AppController {
 		// 	'host' => 'ssl://maspapaya.net',
 		// 	'username' => 'william.alarcon@maspapaya.net',
 		// 	'password' => 'w1094917102#A',
-		// );
+		// );	
 	}
 
 // 	public function isAuthorized() {

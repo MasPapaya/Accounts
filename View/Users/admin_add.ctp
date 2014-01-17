@@ -9,11 +9,8 @@
 		echo $this->Form->input('group_id');
 		echo $this->Form->input('username');
 		echo $this->Form->input('password');
-		echo $this->Form->input('password_2', array('type' => 'password', 'label' => __d('accounts', 'Repeat Password')));
-//		echo $this->Form->input('fbid');
-//		echo $this->Form->input('twid');		
+		echo $this->Form->input('password_2', array('type' => 'password', 'label' => __d('accounts', 'Repeat Password')));		
 		echo $this->Form->input('email');
-		//echo $this->Form->input('birthday', array('type' => 'text', 'class' => 'date'));
 		echo $this->Form->input('activated', array('type' => 'hidden', 'value' => date('Y-m-d H:i:s')));
 		?>
     </fieldset>
@@ -32,8 +29,8 @@
 			echo $this->Form->input('Profile.location_id', array('options' => $locations, 'default' => 'empty', 'empty' => 'Seleccione un Pais'));
 		}
 		echo $this->Form->input('Profile.address');
-		echo $this->Form->input('Profile.docid_type_id', array('label' => __d('accounts', 'Docid Type'), 'options' => $doctypes, 'default' => 'empty', 'empty' => __('Select Docid Type')));
-		echo $this->Form->input('Profile.docid', array('label' => __d('accounts', 'Docid')));
+//		echo $this->Form->input('Profile.docid_type_id', array('label' => __d('accounts', 'Docid Type'), 'options' => $doctypes, 'default' => 'empty', 'empty' => __('Select Docid Type')));
+//		echo $this->Form->input('Profile.docid', array('label' => __d('accounts', 'Docid')));
 		echo $this->Form->input('Profile.phone');
 		echo $this->Form->input('Profile.mobile', array('label' => __d('accounts', 'Mobile')));
 

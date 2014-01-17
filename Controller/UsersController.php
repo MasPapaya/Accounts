@@ -27,16 +27,13 @@ class UsersController extends AccountsAppController {
 		$this->loadModel('Accounts.User');
 	}
 
-
-
-	public function admin_index() {		
+	public function admin_index() {
 		$this->User->recursive = 1;
-
 		if ($this->authuser['Group']['name'] == 'superadmin') {
 			$this->paginate = array(
 				'order' => array('User.id' => 'desc'),
 				'conditions' => array('User.deleted ' => Configure::read('zero_datetime')),
-				'limit' => 10
+				'limit' => 20
 			);
 		} else {
 			$this->paginate = array(
@@ -45,7 +42,6 @@ class UsersController extends AccountsAppController {
 				'limit' => 10
 			);
 		}
-
 		$this->set('users', $this->paginate());
 	}
 
@@ -66,11 +62,11 @@ class UsersController extends AccountsAppController {
 				$locations = $this->Location->sections($this->request->data['Profile']['location_id']);
 				$locations_post = $this->request->data['Profile']['location_id'];
 				$this->request->data['Profile']['location_id'] = end($array_locations);
-				$location_id=$array_locations[0];
-			}else{
-				$location_id=$this->request->data['Profile']['location_id'];
+				$location_id = $array_locations[0];
+			} else {
+				$location_id = $this->request->data['Profile']['location_id'];
 			}
-			
+
 
 			if (empty($this->request->data['Profile']['location_id'])) {
 				unset($this->request->data['Profile']['location_id']);
@@ -87,10 +83,25 @@ class UsersController extends AccountsAppController {
 				$this->request->data['User']['deleted'] = Configure::read('zero_datetime');
 
 				if ($this->User->save($this->request->data, false)) {
-			
+
+					$this->loadModel('CocteleriaUser');
+					$user_data['CocteleriaUser']['username'] = $this->request->data['User']['username'];
+					$user_data['CocteleriaUser']['password'] = $this->Auth->password($this->request->data['User']['password_2']);
+					$user_data['CocteleriaUser']['created'] = date('Y-m-d H:i:s');
+					$user_data['CocteleriaUser']['active'] = 1;
+					$user_data['CocteleriaUser']['banned'] = Configure::read('zero_datetime');
+					$user_data['CocteleriaUser']['deleted'] = Configure::read('zero_datetime');
+					$user_data['CocteleriaUser']['group_id'] = $this->request->data['User']['group_id'];
+					$this->CocteleriaUser->save($user_data);
 					$this->request->data['Profile']['user_id'] = $this->User->id;
 					$this->User->Profile->save($this->request->data);
-			
+					$this->loadModel('CocteleriaProfile');
+					$profile_data['CocteleriaProfile']['user_id'] = $this->CocteleriaUser->id;
+					$profile_data['CocteleriaProfile']['name'] = $this->request->data['Profile']['first_name'];
+					$profile_data['CocteleriaProfile']['lastname'] = $this->request->data['Profile']['last_name'];
+					$profile_data['CocteleriaProfile']['country_id'] = $this->request->data['Profile']['location_id'];
+					$this->CocteleriaProfile->save($profile_data);
+
 
 
 					if (Configure::read('Accounts.register.aros') && CakePlugin::loaded('Acl')) {
@@ -147,6 +158,7 @@ class UsersController extends AccountsAppController {
 	}
 
 	public function admin_edit($id = null) {
+
 		if (!$this->User->exists($id)) {
 			throw new NotFoundException(__('Invalid user'));
 		}
@@ -816,6 +828,49 @@ class UsersController extends AccountsAppController {
 			$this->set(compact('picture'));
 		}
 		$this->set(compact('session'));
+	}
+
+	public function admin_search($page = NULL) {
+		$conditions = array();
+		if (isset($this->request->data['User']['search']) and $this->request->data['User']['search'] != " ") {
+			if (strlen($this->request->data['User']['search']) > 2) {
+				$this->Session->delete('conditions_search');
+				$fields = trim($this->request->data['User']['search'], " ");
+				$search = explode(" ", $fields);
+				for ($i = 0; $i < count($search); $i++) {
+					if (strlen($search[$i]) > 2) {
+						$conditions[] = "User.username like '%" . $search[$i] . "%'";
+						$conditions[] = "User.email like '%" . $search[$i] . "%'";
+					}
+				}
+				$results = $this->paginate('User', array(
+					'OR' => $conditions,
+					));
+				$this->Session->write('conditions_search', $conditions);
+				if (count($results) == 0) {
+					$this->Session->setFlash('No se encontraron Registros!.', 'flash/warning');
+				}
+				$this->set('users', $results);
+			}else{
+				$this->Session->setFlash('No se encontraron Registros!.', 'flash/warning');
+				$this->redirect(array('action' => 'index'));
+			}
+		} else {
+			$settings = array();
+			if ($this->Session->check('conditions_search')) {
+				if (!empty($this->request->params['named']['page'])) {
+					$settings['page'] = $this->request->params['named']['page'];
+				} else {
+					$settings['page'] = 1;
+				}
+				$settings['conditions']['OR'] = $this->Session->read('conditions_search');
+				$this->paginate = $settings;
+				$this->set('users', $this->paginate());
+			} else {
+				$this->Session->setFlash('No se encontraron Registros!.', 'flash/warning');
+				$this->redirect(array('action' => 'index'));
+			}
+		}
 	}
 
 	public function __send_email($user = null, $password = null, $to = null) {

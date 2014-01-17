@@ -1,5 +1,6 @@
 <div class="users ">
-	<?php echo $this->Html->link('<i class="icon-plus-sign icon-white"></i>&nbsp;' . __d('accounts', 'New User'), array('action' => 'add', 'admin' => true), array('class' => 'btn btn-primary', 'escape' => FALSE)); ?>	
+	<?php //echo $this->Html->link('<i class="icon-plus-sign icon-white"></i>&nbsp;' . __d('accounts', 'New User'), array('action' => 'add', 'admin' => true), array('class' => 'btn btn-primary', 'escape' => FALSE)); ?>
+	<?php echo $this->Html->link('<i class="icon-plus-sign icon-white"></i>&nbsp;' . __d('accounts', 'New User'), array('plugin' => 'blog', 'controller' => 'BlogUsers', 'action' => 'add', 'admin' => true), array('class' => 'btn btn-primary', 'escape' => FALSE)); ?>
 
 	<div class="title_form">
 		<h2><?php echo __d('accounts', 'Users'); ?></h2>
@@ -28,7 +29,8 @@
 					<td><?php echo h($user['User']['email']); ?>&nbsp;</td>		
 					<td class="actions">
 						<div class="btn-group">
-							<?php echo $this->Html->link('<i class="icon-pencil"></i>', array('action' => 'edit', $user['User']['id']), array('escape' => FALSE, 'class' => 'btn')) ?>														
+							<?php //echo $this->Html->link('<i class="icon-pencil"></i>', array('action' => 'edit', $user['User']['id']), array('escape' => FALSE, 'class' => 'btn')) ?>							
+							<?php echo $this->Html->link('<i class="icon-pencil"></i>', array('plugin' => 'blog', 'controller' => 'BlogUsers', 'action' => 'edit', $user['User']['id'], 'admin' => true), array('escape' => FALSE, 'class' => 'btn')) ?>							
 							<?php echo $this->Html->link('<i class="icon-eye-open"></i>', array('action' => 'view', $user['User']['id']), array('escape' => FALSE, 'class' => 'btn')) ?>							
 							<?php if (Configure::read('Accounts.register.data') == 'both' || Configure::read('Accounts.register.data') == 'profile'): ?>
 								<?php echo $this->Html->link('<i class="icon-edit"></i>', array('plugin' => 'accounts', 'controller' => 'Users', 'action' => 'myprofileedit', 'admin' => false), array('escape' => FALSE, 'class' => 'btn')) ?>
