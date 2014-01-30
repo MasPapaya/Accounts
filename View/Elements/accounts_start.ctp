@@ -2,8 +2,7 @@
 	<ul class="nav pull-right">
 		<li id="fat-menu" class="dropdown">
 			<a class="dropdown-toggle" data-toggle="dropdown" href="#">
-				<i class="icon-user"></i> <?php echo $authuser['username'] ?>
-				<span class="caret"></span>
+				<i class="icon-user"></i> <?php echo $authuser['username'] ?>				
 			</a>
 			<ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
 				<li><?php echo $this->Html->link(__('Go to site'), '/', array('target' => '_blank')); ?></li>

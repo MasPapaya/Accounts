@@ -1,4 +1,4 @@
-<div class="users ">
+<div class="users">
 	<?php echo $this->Html->link('<i class="icon-plus-sign icon-white"></i>&nbsp;' . __d('accounts', 'New User'), array('action' => 'add', 'admin' => true), array('class' => 'btn btn-primary', 'escape' => FALSE)); ?>	
 
 	<div class="title_form">
