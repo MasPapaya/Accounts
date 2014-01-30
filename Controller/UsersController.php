@@ -80,10 +80,10 @@ class UsersController extends AccountsAppController {
 			if ($this->User->validates() && $this->User->Profile->validates()) {
 				$this->request->data['User']['banned'] = Configure::read('zero_datetime');
 				$this->request->data['User']['deleted'] = Configure::read('zero_datetime');
-				if ($this->User->save($this->request->data, false)) {					
-					
+				if ($this->User->save($this->request->data, false)) {
+
 					$this->request->data['Profile']['user_id'] = $this->User->id;
-					$this->User->Profile->save($this->request->data);								
+					$this->User->Profile->save($this->request->data);
 
 					if (Configure::read('Accounts.register.aros') && CakePlugin::loaded('Acl')) {
 						$this->loadModel('Acl.ManagedAro');
@@ -252,6 +252,7 @@ class UsersController extends AccountsAppController {
 					if (CakePlugin::loaded('Resources') && Configure::read('Accounts.profile.picture') == TRUE) {
 						$this->loadModel('Resources.ViewResource');
 						$authuser = $this->Auth->user();
+
 						$this->ViewResource->recursive = -1;
 						$picture = $this->ViewResource->find('first', array(
 							'conditions' => array(
@@ -286,7 +287,10 @@ class UsersController extends AccountsAppController {
 				$this->Session->setFlash(__('User restricted!'), 'flash/error');
 			}
 		} else {
-			$this->Session->destroy();
+			if (CakePlugin::loaded('MenuManager')) {
+				$this->Session->delete('set_menu');
+				$this->Session->delete('menu_options');
+			}
 		}
 	}
 
