@@ -21,7 +21,7 @@
 		echo $this->Form->input('Profile.first_name', array('label' => __d('accounts', 'First Name')));
 		echo $this->Form->input('Profile.last_name', array('label' => __d('accounts', 'Last Name')));
 		echo $this->Form->input('Profile.birthday', array('type' => 'text', 'class' => '_date', 'placeholder' => __('yyyy-mm-dd')));
-		echo __('Gender') . '<br/>';
+		echo __d('accounts','Gender') . '<br/>';
 		echo $this->Form->input('Profile.gender', array('type' => 'radio', 'options' => array('M' => __('Male'), 'F' => __('Female')), 'legend' => false));
 		if (Configure::read('Configuration.location.tree')) {
 			echo $this->Locations->input('Profile', $locations);

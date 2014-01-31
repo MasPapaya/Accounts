@@ -100,7 +100,7 @@ class UsersController extends AccountsAppController {
 
 							$this->ManagedAro->save();
 						} else {
-							$this->Session->setFlash(__('Please ask the administrator to fix ACL, user groups'), 'flash/error');
+							$this->Session->setFlash(__d('accounts', 'Please ask the administrator to fix ACL, user groups'), 'flash/error');
 							return true;
 						}
 					}
@@ -109,13 +109,13 @@ class UsersController extends AccountsAppController {
 						$this->__send_email($this->request->data['User']['username'], $this->request->data['User']['password'], $this->request->data['User']['email']);
 					}
 
-					$this->Session->setFlash(__('The user has been saved'), 'flash/success');
+					$this->Session->setFlash(__d('accounts','The user has been saved'), 'flash/success');
 					$this->redirect(array('action' => 'index'));
 				} else {
-					$this->Session->setFlash(__('The user could not be saved. Please, try again.'), 'flash/error');
+					$this->Session->setFlash(__d('accounts','The user could not be saved. Please, try again.'), 'flash/error');
 				}
 			} else {
-				$this->Session->setFlash(__('The user could not be saved. Please, try again.'), 'flash/warning');
+				$this->Session->setFlash(__d('accounts','The user could not be saved. Please, try again.'), 'flash/warning');
 			}
 
 			$this->request->data['User']['password'] = '';
@@ -162,7 +162,7 @@ class UsersController extends AccountsAppController {
 						)
 						));
 					if ($attempts > 0) {
-						$this->Session->setFlash(__('For safety reasons not to repeat the password'), 'flash/warning');
+						$this->Session->setFlash(__d('accounts','For safety reasons not to repeat the password'), 'flash/warning');
 						$this->redirect(array('action' => 'edit', 'admin' => true, $this->request->data['User']['id']));
 					}
 				} else {
@@ -170,10 +170,10 @@ class UsersController extends AccountsAppController {
 				}
 				$this->User->validator()->remove('password', 'regexp');
 				if ($this->User->save($this->request->data)) {
-					$this->Session->setFlash(__('The user has been saved'), 'flash/success');
+					$this->Session->setFlash(__d('accounts','The user has been saved'), 'flash/success');
 					$this->redirect(array('action' => 'index', 'admin' => true));
 				} else {
-					$this->Session->setFlash(__('The user could not be saved. Please, try again.'), 'flash/error');
+					$this->Session->setFlash(__d('accounts','The user could not be saved. Please, try again.'), 'flash/error');
 				}
 			} else {
 				$this->request->data['User']['password'] = '';
@@ -203,7 +203,7 @@ class UsersController extends AccountsAppController {
 		$this->User->updateAll(
 			array('User.deleted' => "'" . date('Y-m-d H:i:s') . "'"), array('User.id' => $id)
 		);
-		$this->Session->setFlash(__('User was not deleted'), 'flash/error');
+		$this->Session->setFlash(__d('accounts','User was not deleted'), 'flash/error');
 		$this->redirect(array('action' => 'index'));
 
 
@@ -281,10 +281,10 @@ class UsersController extends AccountsAppController {
 					);
 					$this->UserLog->save();
 					$this->request->data['User']['password'] = '';
-					$this->Session->setFlash(__('Invalid username or password, try again'), 'flash/error');
+					$this->Session->setFlash(__d('accounts','Invalid username or password, try again'), 'flash/error');
 				}
 			} else {
-				$this->Session->setFlash(__('User restricted!'), 'flash/error');
+				$this->Session->setFlash(__d('accounts','User restricted!'), 'flash/error');
 			}
 		} else {
 			if (CakePlugin::loaded('MenuManager')) {
@@ -380,7 +380,7 @@ class UsersController extends AccountsAppController {
 						if ($this->Profile->validates()) {
 							$valid = TRUE;
 						} else {
-							$this->Session->setFlash(__('User Profile is not valid.'), 'flash/error');
+							$this->Session->setFlash(__d('accounts','User Profile is not valid.'), 'flash/error');
 						}
 						break;
 					case 'attributes':
@@ -388,7 +388,7 @@ class UsersController extends AccountsAppController {
 						if ($this->Attribute->validate($attr, $this->request->data)) {
 							$valid = TRUE;
 						} else {
-							$this->Session->setFlash(__('User Attributes are not valid.'), 'flash/error');
+							$this->Session->setFlash(__d('accounts','User Attributes are not valid.'), 'flash/error');
 						}
 						break;
 					case 'both':
@@ -397,7 +397,7 @@ class UsersController extends AccountsAppController {
 						if ($this->Profile->validates() && $this->Attribute->validate($attr, $this->request->data)) {
 							$valid = TRUE;
 						} else {
-							$this->Session->setFlash(__('User Profile / Attributes are not valid.'), 'flash/error');
+							$this->Session->setFlash(__d('accounts','User Profile / Attributes are not valid.'), 'flash/error');
 						}
 						break;
 					case 'none':
@@ -412,7 +412,7 @@ class UsersController extends AccountsAppController {
 				if ($valid) {
 					if (Configure::read('Accounts.register.captcha') == FALSE || (Configure::read('Accounts.register.captcha') == TRUE && $recaptcha->is_valid)) {
 						if (isset($this->request->data['User']['accept_terms']) && $this->request->data['User']['accept_terms'] == 1) {
-							$this->Session->setFlash(__('All valid.'), 'flash/success');
+							$this->Session->setFlash(__d('accounts','All valid.'), 'flash/success');
 
 							if ($this->User->save($user)) {
 
@@ -431,7 +431,7 @@ class UsersController extends AccountsAppController {
 
 										$this->ManagedAro->save();
 									} else {
-										$this->Session->setFlash(__('Please ask the administrator to fix ACL, user groups'), 'flash/error');
+										$this->Session->setFlash(__d('accounts','Please ask the administrator to fix ACL, user groups'), 'flash/error');
 										return true;
 									}
 								}
@@ -445,30 +445,30 @@ class UsersController extends AccountsAppController {
 //									pr($this->User->Profile->validationErrors);
 								}
 								if (Configure::check('Accounts.register.default.active') && Configure::read('Accounts.register.default.active') == TRUE) {
-									$this->Session->setFlash(__('User created successfully, please login.'), 'flash/success');
+									$this->Session->setFlash(__d('accounts','User created successfully, please login.'), 'flash/success');
 									$this->redirect(array('action' => 'login'));
 								} else {
 									$vcode = md5($this->User->id . '' . $this->User->created . '' . $this->User->email);
 									$email = new CakeEmail('smtp'); // Definirlo con variable de configuracion
 									$email->viewVars(array('code' => $vcode, 'id' => $this->User->id));
 									$email->template('register', 'default')->subject(__('Account activation'))->emailFormat('html')->to($this->request->data['User']['email'])->send();
-									$this->Session->setFlash(__('User created successfully, please check your inbox for an activation email.'), 'flash/success');
+									$this->Session->setFlash(__d('accounts','User created successfully, please check your inbox for an activation email.'), 'flash/success');
 									$this->redirect('/');
 								}
 							} else {
-								$this->Session->setFlash(__('User not save.'), 'flash/error');
+								$this->Session->setFlash(__d('accounts','User not save.'), 'flash/error');
 								// debug($this->User->validationErrors);
 							}
 						} else {
-							$this->Session->setFlash(__('Must accept terms.'), 'flash/error');
+							$this->Session->setFlash(__d('accounts','Must accept terms.'), 'flash/error');
 						}
 					} else {
-						$this->Session->setFlash(__('Captcha is not valid.'), 'flash/error');
+						$this->Session->setFlash(__d('accounts','Captcha is not valid.'), 'flash/error');
 					}
 				}
 			} else {
 
-				$this->Session->setFlash(__('User Data is not valid.'), 'flash/error');
+				$this->Session->setFlash(__d('accounts','User Data is not valid.'), 'flash/error');
 				// debug($this->User->validationErrors);
 			}
 			if (Configure::read('Configuration.location.tree')) {
@@ -560,13 +560,13 @@ class UsersController extends AccountsAppController {
 					$email->viewVars(array('id' => $user['User']['id'], 'username' => $user['User']['username'], 'password' => $password));
 					$email->template('remember', 'default')->subject(__('Restore password'))->emailFormat('html')->to($user['User']['email'])->send();
 
-					$this->Session->setFlash(__('A new password has been sent to your email.'), 'flash/success');
+					$this->Session->setFlash(__d('accounts','A new password has been sent to your email.'), 'flash/success');
 					$this->redirect('/');
 				} else {
-					$this->Session->setFlash(__('Error restore password.'), 'flash/error');
+					$this->Session->setFlash(__d('accounts','Error restore password.'), 'flash/error');
 				}
 			} else {
-				$this->Session->setFlash(__('The username or email not exists'), 'flash/error');
+				$this->Session->setFlash(__d('accounts','The username or email not exists'), 'flash/error');
 			}
 		}
 	}
@@ -615,10 +615,10 @@ class UsersController extends AccountsAppController {
 				}
 				unset($this->request->data['User']['username']);
 				if ($this->User->save($this->request->data)) {
-					$this->Session->setFlash(__('The user has been saved'), 'flash/success');
+					$this->Session->setFlash(__d('accounts','The user has been saved'), 'flash/success');
 					$this->redirect(array('action' => 'myprofile'));
 				} else {
-					$this->Session->setFlash(__('The user could not be saved. Please, try again.'), 'flash/error');
+					$this->Session->setFlash(__d('accounts','The user could not be saved. Please, try again.'), 'flash/error');
 				}
 				unset($this->request->data['User']['password']);
 				unset($this->request->data['User']['password_2']);
@@ -632,7 +632,7 @@ class UsersController extends AccountsAppController {
 //				);
 			}
 		} else {
-			$this->Session->setFlash(__('No user session.'), 'flash/warning');
+			$this->Session->setFlash(__d('accounts','No user session.'), 'flash/warning');
 			$this->redirect('/');
 		}
 	}
@@ -661,10 +661,10 @@ class UsersController extends AccountsAppController {
 
 				if ($this->Profile->save($this->request->data)) {
 
-					$this->Session->setFlash(__('The profile has been saved.'), 'flash/success');
+					$this->Session->setFlash(__d('accounts','The profile has been saved.'), 'flash/success');
 					$this->redirect(array('action' => 'myprofile'));
 				} else {
-					$this->Session->setFlash(__('The profile could not be saved. Please, try again.'), 'flash/error');
+					$this->Session->setFlash(__d('accounts','The profile could not be saved. Please, try again.'), 'flash/error');
 				}
 				if (Configure::read('Configuration.location.tree')) {
 					$this->request->data['Profile']['location_id'] = $locations_post;
@@ -685,7 +685,7 @@ class UsersController extends AccountsAppController {
 			$doctypes = $this->Profile->DocidType->find('list', array('fields' => array('id', 'name')));
 			$this->set(compact('locations', 'doctypes'));
 		} else {
-			$this->Session->setFlash(__('No user session.'), 'flash/warning');
+			$this->Session->setFlash(__d('accounts','No user session.'), 'flash/warning');
 			$this->redirect('/');
 		}
 	}
@@ -742,24 +742,24 @@ class UsersController extends AccountsAppController {
 							if ($this->Attribute->validate($attr, $this->request->data)) {
 								$this->Attribute->edit($this->request->data['AttributeType'], $this->authuser['id'], 'user');
 							} else {
-								$this->Session->setFlash(__('The user has been saved'), 'flash/success');
+								$this->Session->setFlash(__d('accounts','The user has been saved'), 'flash/success');
 							}
-							$this->Session->setFlash(__('The user has been saved'), 'flash/success');
+							$this->Session->setFlash(__d('accounts','The user has been saved'), 'flash/success');
 						} else {
-							$this->Session->setFlash(__('The user could not be saved. Please, try again.'), 'flash/error');
+							$this->Session->setFlash(__d('accounts','The user could not be saved. Please, try again.'), 'flash/error');
 						}
 						unset($this->request->data['User']['password']);
 						unset($this->request->data['User']['password_2']);
-						$this->Session->setFlash(__('The profile has been saved.'), 'flash/success');
+						$this->Session->setFlash(__d('accounts','The profile has been saved.'), 'flash/success');
 						//$this->redirect(array('action' => 'myprofile'));
 					} else {
-						$this->Session->setFlash(__('The profile could not be saved. Please, try again.'), 'flash/error');
+						$this->Session->setFlash(__d('accounts','The profile could not be saved. Please, try again.'), 'flash/error');
 					}
 					if (Configure::read('Configuration.location.tree')) {
 						$this->request->data['Profile']['location_id'] = $locations_post;
 					}
 				} else {
-					$this->Session->setFlash(__('The form is no complet'), 'flash/warning');
+					$this->Session->setFlash(__d('accounts','The form is no complet'), 'flash/warning');
 				}
 			} else {
 
@@ -784,7 +784,7 @@ class UsersController extends AccountsAppController {
 				$this->helpers[] = 'Resources.Frame';
 			}
 		} else {
-			$this->Session->setFlash(__('No user session.'), 'flash/warning');
+			$this->Session->setFlash(__d('accounts','No user session.'), 'flash/warning');
 			$this->redirect('/');
 		}
 	}

@@ -2,13 +2,13 @@
 	<div class="well">
 		<ul class="nav nav-list">
 			<li class="nav-header"><h3><?php echo __('Actions'); ?></h3></li>
-			<li><?php echo $this->Ajs->link('<i class="icon-list"></i>' . __('List Profiles'), array('action' => 'index'), '', '#primary-ajax'); ?></li>
+			<li><?php echo $this->Ajs->link('<i class="icon-list"></i>' . __d('accounts','List Profiles'), array('action' => 'index'), '', '#primary-ajax'); ?></li>
 		</ul>
 	</div>
 </div>
 
 <div class="span8">
-	<h2><?php echo __('Profile'); ?></h2>
+	<h2><?php echo __d('accounts','Profile'); ?></h2>
 	<dl>
 		<dt><?php echo __('Id'); ?></dt>
 		<dd>

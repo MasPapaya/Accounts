@@ -13,26 +13,6 @@ class ProfilesController extends AccountsAppController {
 		parent::beforeFilter();
 	}
 
-// 	public function isAuthorized() {
-
-// //		parent::isAuthorized();
-// 		switch ($this->Auth->user('group_id')) {
-// 			case 1:
-// 			case 2:
-// 				return true;
-// 				break;
-// 			case 3:
-// 				return false;
-// 				break;
-// 			case 4:
-// 				return false;
-// 				break;
-// 			default :
-// 				return false;
-// 				break;
-// 		}
-// 	}
-
 	/**
 	 * index method
 	 *
@@ -67,10 +47,10 @@ class ProfilesController extends AccountsAppController {
 		if ($this->request->is('post')) {
 			$this->Profile->create();
 			if ($this->Profile->save($this->request->data)) {
-				$this->Session->setFlash(__('The profile has been saved'), 'flash/success');
+				$this->Session->setFlash(__d('accounts', 'The profile has been saved'), 'flash/success');
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(__('The profile could not be saved. Please, try again.'), 'flash/error');
+				$this->Session->setFlash(__d('accounts','The profile could not be saved. Please, try again.'), 'flash/error');
 			}
 		}
 		$users = $this->Profile->User->find('list');
@@ -91,10 +71,10 @@ class ProfilesController extends AccountsAppController {
 		}
 		if ($this->request->is('post') || $this->request->is('put')) {
 			if ($this->Profile->save($this->request->data)) {
-				$this->Session->setFlash(__('The profile has been saved'), 'flash/success');
+				$this->Session->setFlash(__d('accounts','The profile has been saved'), 'flash/success');
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(__('The profile could not be saved. Please, try again.'), 'flash/error');
+				$this->Session->setFlash(__d('accounts','The profile could not be saved. Please, try again.'), 'flash/error');
 			}
 		} else {
 			$options = array('conditions' => array('Profile.' . $this->Profile->primaryKey => $id));
@@ -115,14 +95,14 @@ class ProfilesController extends AccountsAppController {
 	public function admin_delete($id = null) {
 		$this->Profile->id = $id;
 		if (!$this->Profile->exists()) {
-			throw new NotFoundException(__('Invalid profile'), 'flash/warning');
+			throw new NotFoundException(__d('accounts','Invalid profile'), 'flash/warning');
 		}
 		$this->request->onlyAllow('post', 'delete');
 		if ($this->Profile->delete()) {
-			$this->Session->setFlash(__('Profile deleted'), 'flash/success');
+			$this->Session->setFlash(__d('accounts','Profile deleted'), 'flash/success');
 			$this->redirect(array('action' => 'index'));
 		}
-		$this->Session->setFlash(__('Profile was not deleted'), 'flash/error');
+		$this->Session->setFlash(__d('accounts','Profile was not deleted'), 'flash/error');
 		$this->redirect(array('action' => 'index'));
 	}
 

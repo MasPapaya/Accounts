@@ -57,10 +57,10 @@ class DocidTypesController extends AccountsAppController {
 		if ($this->request->is('post')) {
 			$this->DocidType->create();
 			if ($this->DocidType->save($this->request->data)) {
-				$this->Session->setFlash(__('The docid type has been saved.'),'flash/success');
+				$this->Session->setFlash(__d('accounts','The docid type has been saved.'),'flash/success');
 				return $this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(__('The docid type could not be saved. Please, try again.'),'flash/warning');
+				$this->Session->setFlash(__d('accounts','The docid type could not be saved. Please, try again.'),'flash/warning');
 			}
 		}
 	}
@@ -78,10 +78,10 @@ class DocidTypesController extends AccountsAppController {
 		}
 		if ($this->request->is(array('post', 'put'))) {
 			if ($this->DocidType->save($this->request->data)) {
-				$this->Session->setFlash(__('The docid type has been saved.'),'flash/success');
+				$this->Session->setFlash(__d('accounts','The docid type has been saved.'),'flash/success');
 				return $this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(__('The docid type could not be saved. Please, try again.'),'flash/warnig');
+				$this->Session->setFlash(__d('accounts','The docid type could not be saved. Please, try again.'),'flash/warnig');
 			}
 		} else {
 			$options = array('conditions' => array('DocidType.' . $this->DocidType->primaryKey => $id));
@@ -103,9 +103,9 @@ class DocidTypesController extends AccountsAppController {
 		}
 		$this->request->onlyAllow('post', 'delete');
 		if ($this->DocidType->delete()) {
-			$this->Session->setFlash(__('The docid type has been deleted.'),'flash/success');
+			$this->Session->setFlash(__d('accounts','The docid type has been deleted.'),'flash/success');
 		} else {
-			$this->Session->setFlash(__('The docid type could not be deleted. Please, try again.'),'flash/warning');
+			$this->Session->setFlash(__d('accounts','The docid type could not be deleted. Please, try again.'),'flash/warning');
 		}
 		return $this->redirect(array('action' => 'index'));
 	}
