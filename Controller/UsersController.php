@@ -6,6 +6,15 @@ App::uses('CakeTime', 'Utility');
 //require_once ROOT . DS . 'app' . DS . 'Plugin' . DS . 'Accounts' . DS . 'Vendor' . DS . 'Recaptcha' . DS . 'recaptchalib.php';
 App::import('Accounts.Vendor', 'Recaptcha/recaptchalib');
 
+
+/* * * Integracion con facebook** */
+App::import(ROOT . DS . 'app' . DS . 'Plugin' . DS . 'Accounts' . DS . 'Vendor' . DS . 'Facebook' . DS . 'facebook.php');
+require_once ROOT . DS . 'app' . DS . 'Plugin' . DS . 'Accounts' . DS . 'Vendor' . DS . 'Facebook' . DS . 'facebook.php';
+/* * *Fin** */
+
+/* * *Integracion con Twitter** */
+require_once ROOT . DS . 'app' . DS . 'Plugin' . DS . 'Accounts' . DS . 'Vendor' . DS . 'Twitter' . DS . 'twitteroauth.php';
+
 /**
  * Users Controller
  *
@@ -16,9 +25,25 @@ class UsersController extends AccountsAppController {
 	public $helpers = array();
 //	public $uses = array('Accounts.User');
 	var $components = array();
+	public $facebook;
+	public $fbuid = '';
+	public $uses = array();
+	public $google = '';
+	public $plus_service;
+	public $oauth2service;
+	private $accessToken = '';
 
 	public function beforeFilter() {
 		parent::beforeFilter();
+
+		$this->facebook = new Facebook(array(
+				'appId' => Configure::read('Accounts.facebook.appId'),
+				'secret' => Configure::read('Accounts.facebook.secret'),
+				'cookie' => true
+			));
+		if ($this->Session->check('accessToken')) {
+			$this->accessToken = $this->Session->read('accessToken');
+		}
 		if (Configure::read('debug') > 1) {
 			$this->Auth->allow();
 		} else {
@@ -109,13 +134,13 @@ class UsersController extends AccountsAppController {
 						$this->__send_email($this->request->data['User']['username'], $this->request->data['User']['password'], $this->request->data['User']['email']);
 					}
 
-					$this->Session->setFlash(__d('accounts','The user has been saved'), 'flash/success');
+					$this->Session->setFlash(__d('accounts', 'The user has been saved'), 'flash/success');
 					$this->redirect(array('action' => 'index'));
 				} else {
-					$this->Session->setFlash(__d('accounts','The user could not be saved. Please, try again.'), 'flash/error');
+					$this->Session->setFlash(__d('accounts', 'The user could not be saved. Please, try again.'), 'flash/error');
 				}
 			} else {
-				$this->Session->setFlash(__d('accounts','The user could not be saved. Please, try again.'), 'flash/warning');
+				$this->Session->setFlash(__d('accounts', 'The user could not be saved. Please, try again.'), 'flash/warning');
 			}
 
 			$this->request->data['User']['password'] = '';
@@ -162,7 +187,7 @@ class UsersController extends AccountsAppController {
 						)
 						));
 					if ($attempts > 0) {
-						$this->Session->setFlash(__d('accounts','For safety reasons not to repeat the password'), 'flash/warning');
+						$this->Session->setFlash(__d('accounts', 'For safety reasons not to repeat the password'), 'flash/warning');
 						$this->redirect(array('action' => 'edit', 'admin' => true, $this->request->data['User']['id']));
 					}
 				} else {
@@ -170,10 +195,10 @@ class UsersController extends AccountsAppController {
 				}
 				$this->User->validator()->remove('password', 'regexp');
 				if ($this->User->save($this->request->data)) {
-					$this->Session->setFlash(__d('accounts','The user has been saved'), 'flash/success');
+					$this->Session->setFlash(__d('accounts', 'The user has been saved'), 'flash/success');
 					$this->redirect(array('action' => 'index', 'admin' => true));
 				} else {
-					$this->Session->setFlash(__d('accounts','The user could not be saved. Please, try again.'), 'flash/error');
+					$this->Session->setFlash(__d('accounts', 'The user could not be saved. Please, try again.'), 'flash/error');
 				}
 			} else {
 				$this->request->data['User']['password'] = '';
@@ -203,7 +228,7 @@ class UsersController extends AccountsAppController {
 		$this->User->updateAll(
 			array('User.deleted' => "'" . date('Y-m-d H:i:s') . "'"), array('User.id' => $id)
 		);
-		$this->Session->setFlash(__d('accounts','User was not deleted'), 'flash/error');
+		$this->Session->setFlash(__d('accounts', 'User was not deleted'), 'flash/error');
 		$this->redirect(array('action' => 'index'));
 
 
@@ -233,6 +258,10 @@ class UsersController extends AccountsAppController {
 
 				$this->User->recursive = 1;
 				if ($this->Auth->login()) {
+					$authuser = $this->Auth->user();
+					if (CakePlugin::loaded('Gamification')) {
+						$this->Gamification->saveActivity('login', $authuser['id']);
+					}
 					if (CakePlugin::loaded('MenuManager')) {
 						if ($this->Session->check('set_menu')) {
 							$this->Session->delete('set_menu');
@@ -251,8 +280,6 @@ class UsersController extends AccountsAppController {
 
 					if (CakePlugin::loaded('Resources') && Configure::read('Accounts.profile.picture') == TRUE) {
 						$this->loadModel('Resources.ViewResource');
-						$authuser = $this->Auth->user();
-
 						$this->ViewResource->recursive = -1;
 						$picture = $this->ViewResource->find('first', array(
 							'conditions' => array(
@@ -281,10 +308,10 @@ class UsersController extends AccountsAppController {
 					);
 					$this->UserLog->save();
 					$this->request->data['User']['password'] = '';
-					$this->Session->setFlash(__d('accounts','Invalid username or password, try again'), 'flash/error');
+					$this->Session->setFlash(__d('accounts', 'Invalid username or password, try again'), 'flash/error');
 				}
 			} else {
-				$this->Session->setFlash(__d('accounts','User restricted!'), 'flash/error');
+				$this->Session->setFlash(__d('accounts', 'User restricted!'), 'flash/error');
 			}
 		} else {
 			if (CakePlugin::loaded('MenuManager')) {
@@ -380,7 +407,7 @@ class UsersController extends AccountsAppController {
 						if ($this->Profile->validates()) {
 							$valid = TRUE;
 						} else {
-							$this->Session->setFlash(__d('accounts','User Profile is not valid.'), 'flash/error');
+							$this->Session->setFlash(__d('accounts', 'User Profile is not valid.'), 'flash/error');
 						}
 						break;
 					case 'attributes':
@@ -388,7 +415,7 @@ class UsersController extends AccountsAppController {
 						if ($this->Attribute->validate($attr, $this->request->data)) {
 							$valid = TRUE;
 						} else {
-							$this->Session->setFlash(__d('accounts','User Attributes are not valid.'), 'flash/error');
+							$this->Session->setFlash(__d('accounts', 'User Attributes are not valid.'), 'flash/error');
 						}
 						break;
 					case 'both':
@@ -397,7 +424,7 @@ class UsersController extends AccountsAppController {
 						if ($this->Profile->validates() && $this->Attribute->validate($attr, $this->request->data)) {
 							$valid = TRUE;
 						} else {
-							$this->Session->setFlash(__d('accounts','User Profile / Attributes are not valid.'), 'flash/error');
+							$this->Session->setFlash(__d('accounts', 'User Profile / Attributes are not valid.'), 'flash/error');
 						}
 						break;
 					case 'none':
@@ -412,7 +439,7 @@ class UsersController extends AccountsAppController {
 				if ($valid) {
 					if (Configure::read('Accounts.register.captcha') == FALSE || (Configure::read('Accounts.register.captcha') == TRUE && $recaptcha->is_valid)) {
 						if (isset($this->request->data['User']['accept_terms']) && $this->request->data['User']['accept_terms'] == 1) {
-							$this->Session->setFlash(__d('accounts','All valid.'), 'flash/success');
+							$this->Session->setFlash(__d('accounts', 'All valid.'), 'flash/success');
 
 							if ($this->User->save($user)) {
 
@@ -431,7 +458,7 @@ class UsersController extends AccountsAppController {
 
 										$this->ManagedAro->save();
 									} else {
-										$this->Session->setFlash(__d('accounts','Please ask the administrator to fix ACL, user groups'), 'flash/error');
+										$this->Session->setFlash(__d('accounts', 'Please ask the administrator to fix ACL, user groups'), 'flash/error');
 										return true;
 									}
 								}
@@ -445,30 +472,30 @@ class UsersController extends AccountsAppController {
 //									pr($this->User->Profile->validationErrors);
 								}
 								if (Configure::check('Accounts.register.default.active') && Configure::read('Accounts.register.default.active') == TRUE) {
-									$this->Session->setFlash(__d('accounts','User created successfully, please login.'), 'flash/success');
+									$this->Session->setFlash(__d('accounts', 'User created successfully, please login.'), 'flash/success');
 									$this->redirect(array('action' => 'login'));
 								} else {
 									$vcode = md5($this->User->id . '' . $this->User->created . '' . $this->User->email);
 									$email = new CakeEmail('smtp'); // Definirlo con variable de configuracion
 									$email->viewVars(array('code' => $vcode, 'id' => $this->User->id));
 									$email->template('register', 'default')->subject(__('Account activation'))->emailFormat('html')->to($this->request->data['User']['email'])->send();
-									$this->Session->setFlash(__d('accounts','User created successfully, please check your inbox for an activation email.'), 'flash/success');
+									$this->Session->setFlash(__d('accounts', 'User created successfully, please check your inbox for an activation email.'), 'flash/success');
 									$this->redirect('/');
 								}
 							} else {
-								$this->Session->setFlash(__d('accounts','User not save.'), 'flash/error');
+								$this->Session->setFlash(__d('accounts', 'User not save.'), 'flash/error');
 								// debug($this->User->validationErrors);
 							}
 						} else {
-							$this->Session->setFlash(__d('accounts','Must accept terms.'), 'flash/error');
+							$this->Session->setFlash(__d('accounts', 'Must accept terms.'), 'flash/error');
 						}
 					} else {
-						$this->Session->setFlash(__d('accounts','Captcha is not valid.'), 'flash/error');
+						$this->Session->setFlash(__d('accounts', 'Captcha is not valid.'), 'flash/error');
 					}
 				}
 			} else {
 
-				$this->Session->setFlash(__d('accounts','User Data is not valid.'), 'flash/error');
+				$this->Session->setFlash(__d('accounts', 'User Data is not valid.'), 'flash/error');
 				// debug($this->User->validationErrors);
 			}
 			if (Configure::read('Configuration.location.tree')) {
@@ -560,13 +587,13 @@ class UsersController extends AccountsAppController {
 					$email->viewVars(array('id' => $user['User']['id'], 'username' => $user['User']['username'], 'password' => $password));
 					$email->template('remember', 'default')->subject(__('Restore password'))->emailFormat('html')->to($user['User']['email'])->send();
 
-					$this->Session->setFlash(__d('accounts','A new password has been sent to your email.'), 'flash/success');
+					$this->Session->setFlash(__d('accounts', 'A new password has been sent to your email.'), 'flash/success');
 					$this->redirect('/');
 				} else {
-					$this->Session->setFlash(__d('accounts','Error restore password.'), 'flash/error');
+					$this->Session->setFlash(__d('accounts', 'Error restore password.'), 'flash/error');
 				}
 			} else {
-				$this->Session->setFlash(__d('accounts','The username or email not exists'), 'flash/error');
+				$this->Session->setFlash(__d('accounts', 'The username or email not exists'), 'flash/error');
 			}
 		}
 	}
@@ -615,10 +642,10 @@ class UsersController extends AccountsAppController {
 				}
 				unset($this->request->data['User']['username']);
 				if ($this->User->save($this->request->data)) {
-					$this->Session->setFlash(__d('accounts','The user has been saved'), 'flash/success');
+					$this->Session->setFlash(__d('accounts', 'The user has been saved'), 'flash/success');
 					$this->redirect(array('action' => 'myprofile'));
 				} else {
-					$this->Session->setFlash(__d('accounts','The user could not be saved. Please, try again.'), 'flash/error');
+					$this->Session->setFlash(__d('accounts', 'The user could not be saved. Please, try again.'), 'flash/error');
 				}
 				unset($this->request->data['User']['password']);
 				unset($this->request->data['User']['password_2']);
@@ -632,7 +659,7 @@ class UsersController extends AccountsAppController {
 //				);
 			}
 		} else {
-			$this->Session->setFlash(__d('accounts','No user session.'), 'flash/warning');
+			$this->Session->setFlash(__d('accounts', 'No user session.'), 'flash/warning');
 			$this->redirect('/');
 		}
 	}
@@ -661,10 +688,10 @@ class UsersController extends AccountsAppController {
 
 				if ($this->Profile->save($this->request->data)) {
 
-					$this->Session->setFlash(__d('accounts','The profile has been saved.'), 'flash/success');
+					$this->Session->setFlash(__d('accounts', 'The profile has been saved.'), 'flash/success');
 					$this->redirect(array('action' => 'myprofile'));
 				} else {
-					$this->Session->setFlash(__d('accounts','The profile could not be saved. Please, try again.'), 'flash/error');
+					$this->Session->setFlash(__d('accounts', 'The profile could not be saved. Please, try again.'), 'flash/error');
 				}
 				if (Configure::read('Configuration.location.tree')) {
 					$this->request->data['Profile']['location_id'] = $locations_post;
@@ -685,7 +712,7 @@ class UsersController extends AccountsAppController {
 			$doctypes = $this->Profile->DocidType->find('list', array('fields' => array('id', 'name')));
 			$this->set(compact('locations', 'doctypes'));
 		} else {
-			$this->Session->setFlash(__d('accounts','No user session.'), 'flash/warning');
+			$this->Session->setFlash(__d('accounts', 'No user session.'), 'flash/warning');
 			$this->redirect('/');
 		}
 	}
@@ -742,24 +769,24 @@ class UsersController extends AccountsAppController {
 							if ($this->Attribute->validate($attr, $this->request->data)) {
 								$this->Attribute->edit($this->request->data['AttributeType'], $this->authuser['id'], 'user');
 							} else {
-								$this->Session->setFlash(__d('accounts','The user has been saved'), 'flash/success');
+								$this->Session->setFlash(__d('accounts', 'The user has been saved'), 'flash/success');
 							}
-							$this->Session->setFlash(__d('accounts','The user has been saved'), 'flash/success');
+							$this->Session->setFlash(__d('accounts', 'The user has been saved'), 'flash/success');
 						} else {
-							$this->Session->setFlash(__d('accounts','The user could not be saved. Please, try again.'), 'flash/error');
+							$this->Session->setFlash(__d('accounts', 'The user could not be saved. Please, try again.'), 'flash/error');
 						}
 						unset($this->request->data['User']['password']);
 						unset($this->request->data['User']['password_2']);
-						$this->Session->setFlash(__d('accounts','The profile has been saved.'), 'flash/success');
+						$this->Session->setFlash(__d('accounts', 'The profile has been saved.'), 'flash/success');
 						//$this->redirect(array('action' => 'myprofile'));
 					} else {
-						$this->Session->setFlash(__d('accounts','The profile could not be saved. Please, try again.'), 'flash/error');
+						$this->Session->setFlash(__d('accounts', 'The profile could not be saved. Please, try again.'), 'flash/error');
 					}
 					if (Configure::read('Configuration.location.tree')) {
 						$this->request->data['Profile']['location_id'] = $locations_post;
 					}
 				} else {
-					$this->Session->setFlash(__d('accounts','The form is no complet'), 'flash/warning');
+					$this->Session->setFlash(__d('accounts', 'The form is no complet'), 'flash/warning');
 				}
 			} else {
 
@@ -784,7 +811,7 @@ class UsersController extends AccountsAppController {
 				$this->helpers[] = 'Resources.Frame';
 			}
 		} else {
-			$this->Session->setFlash(__d('accounts','No user session.'), 'flash/warning');
+			$this->Session->setFlash(__d('accounts', 'No user session.'), 'flash/warning');
 			$this->redirect('/');
 		}
 	}
@@ -855,6 +882,421 @@ class UsersController extends AccountsAppController {
 				$this->Session->setFlash('No se encontraron Registros!.', 'flash/warning');
 				$this->redirect(array('action' => 'index'));
 			}
+		}
+	}
+
+	public function loginAuto($user_id, $group_id, $username_login, $password_login, $created, $activated, $modified, $banned, $deleted) {
+
+		$data = array(
+			'id' => $user_id,
+			'group_id' => $group_id,
+			'username' => $username_login,
+			'password' => $password_login,
+			'created' => $created,
+			'activated' => $activated,
+			'modified' => $modified,
+			'banned' => $banned,
+			'deleted' => $deleted
+		);
+
+
+		if ($this->Session->check('Auth.User')) {
+			$this->redirect(array('controller' => 'users', 'action' => 'welcome'));
+		}
+
+		if ($this->Auth->login($data)) {
+			$this->redirect($this->Auth->redirectUrl());
+			$this->redirect(array('controller' => 'users', 'action' => 'welcome'));
+		} else {
+			$this->UserLog->create(array(
+				'username' => $this->request->data['User']['username'],
+				'ip' => $this->request->clientIp(),
+				)
+			);
+			$this->UserLog->save();
+//			$this->Session->setFlash(__('Invalid username or password, try again'), 'flash/error');
+		}
+	}
+
+	public function complete_information() {
+
+		$this->loadModel('Accounts.Profile');		
+		$this->loadModel('Accounts.User');		
+		$this->loadModel('UserPassword');
+		$this->loadModel('AlternateLogin');
+		$this->loadModel('Configurations.Location');
+
+		if ($this->request->is('post') || $this->request->is('put')) {
+
+			$locations = $this->Location->sections($this->request->data['Profile']['location_id']);
+			$locations_post = $this->request->data['Profile']['location_id'];
+			$this->request->data['Profile']['location_id'] = end($this->request->data['Profile']['location_id']);
+
+			$info_complete = $this->request->data;
+			$this->request->data['User']['activated'] = '1800-01-01 00:00:00';
+			$this->request->data['User']['banned'] = '1800-01-01 00:00:00';
+			$this->request->data['User']['deleted'] = '1800-01-01 00:00:00';
+			$this->request->data['User']['created'] = date('Y-m-d H:i:s');
+			$this->request->data['User']['modified'] = '1800-01-01 00:00:00';
+			$this->request->data['User']['username'] = $info_complete['User']['username'];
+			$this->request->data['User']['password'] = $this->Auth->password($info_complete['User']['password']);
+			$this->request->data['User']['password_2'] = $this->Auth->password($info_complete['User']['password_2']);
+			$this->request->data['User']['email'] = $info_complete['User']['email'];
+			$this->request->data['User']['group_id'] = 1;
+
+			$recaptcha = recaptcha_check_answer(Configure::read('Accounts.recaptcha.PrivateKey'), $_SERVER["REMOTE_ADDR"], $this->request->data["recaptcha_challenge_field"], $this->request->data["recaptcha_response_field"]);
+			$this->User->set($info_complete);
+			$this->Profile->set($info_complete);
+
+			$user_location = $this->request->data['Profile']['location_id'];
+
+			$this->User->Profile->validator()->add('accept_terms', array('rule' => 'notempty', 'message' => 'You must accept the terms and conditions'));
+			$this->User->Profile->validator()->add('location_id', array('rule' => 'notempty', 'message' => 'Please select a location'));
+			$this->User->Profile->Validator()->add('docid', 'regexp', array('rule' => '/^([0-9]){7,}$/', 'message' => 'Please enter a correct identification number'));
+			$this->User->Profile->Validator()->add('mobile', 'regexp', array('rule' => '/^([0-9]){10,}$/', 'message' => 'Please enter a correct mobile numbers'));
+			if ($this->User->validates() && $this->User->Profile->validates() && $recaptcha->is_valid & isset($this->request->data['User']['accept_terms']) & $this->request->data['User']['accept_terms'] == 1) {
+
+				$this->User->create();
+
+//				debug($this->request->data());
+
+				if ($this->User->save($this->request->data)) {
+					switch ($info_complete['Profile']['gender']) {
+						case 'male':
+							$gender = 'M';
+							break;
+						case 'female':
+							$gender = 'F';
+							break;
+						default:
+							break;
+					}
+
+					$profile_data = array(
+						'first_name' => $info_complete['Profile']['first_name'],
+						'last_name' => $info_complete['Profile']['last_name'],
+						'docid' => $info_complete['Profile']['docid'],
+						'gender' => $gender,
+						'birthday' => $info_complete['Profile']['birthday'],
+						'address' => $info_complete['Profile']['address'],
+						'mobile' => $info_complete['Profile']['mobile'],
+						'phone' => $info_complete['Profile']['phone'],
+						'location_id' => $user_location,
+						'user_id' => $this->User->id
+					);
+					$this->UserPassword->create();
+
+					$this->request->data['UserPassword']['user_id'] = $this->User->id;
+					$this->request->data['UserPassword']['password'] = $this->request->data['User']['password'];
+					$this->request->data['UserPassword']['created'] = "'" . date('Y-m-d H:i:s') . "'";
+
+					$this->AlternateLogin->create();
+
+					$this->request->data['AlternateLogin']['uid'] = $info_complete['AlternateLogin']['uid'];
+					$this->request->data['AlternateLogin']['user_id'] = $this->User->id;
+					$this->request->data['AlternateLogin']['social_network_id'] = $info_complete['AlternateLogin']['social_network_id'];
+
+					if ($this->Profile->save($profile_data) && $this->UserPassword->save($this->request->data) && $this->AlternateLogin->save($this->request->data)) {
+
+						/**
+						 * inicio codigo email
+						 */
+						$username = $info_complete['User']['username'];
+						$password_user = $info_complete['User']['password'];
+						$code_validated = md5($this->User->id . $this->User->created . $this->User->email);
+
+						$this->set('code', $code_validated);
+						$this->set('user_id', $this->User->id);
+						$this->set('username', $username);
+						$this->set('password', $password_user);
+
+						$this->Email->from = 'info@maspapaya.net';
+
+						$this->Email->to = $info_complete['User']['email'];
+						$this->Email->delivery = 'smtp';
+						$this->Email->subject = __('Account Activation');
+						$this->Email->template = 'Accounts.social_register';
+						$this->Email->sendAs = 'html';
+						$this->Email->send();
+
+//						debug($this->Email->smtpError);
+						/**
+						 * fin codigo email
+						 */
+						$user_id = $this->User->id;
+						$group_id = $this->request->data['User']['group_id'];
+						$username_login = $this->request->data['User']['username'];
+						$password_login = $info_complete['User']['password'];
+						$created = $this->request->data['User']['created'];
+						$activated = $this->request->data['User']['activated'];
+						$modified = $this->request->data['User']['modified'];
+						$banned = $this->request->data['User']['banned'];
+						$deleted = $this->request->data['User']['deleted'];
+
+						$this->loginAuto($user_id, $group_id, $username_login, $password_login, $created, $activated, $modified, $banned, $deleted);
+					} else {
+						$this->request->data['Profile']['location_id'] = $locations_post;
+						$this->Session->setFlash(__('User Profile not saved'), 'flash/error');
+					}
+				} else {
+					$this->request->data['Profile']['location_id'] = $locations_post;
+					$this->Session->setFlash(__('User not saved'), 'flash/error');
+					debug($this->User->validationErrors);
+				}
+			} else {
+				if (!isset($this->request->data['User']['accept_terms'])) {
+
+					$this->User->validationErrors = array_merge($this->User->validationErrors, array('accept_terms' => array(
+							0 => __('You must accept the terms and conditions')
+						)));
+				} else {
+					if (isset($this->request->data['User']['accept_terms']) && $this->request->data['User']['accept_terms'] == 0) {
+
+						$this->User->validationErrors = array_merge($this->User->validationErrors, array('accept_terms' => array(
+								0 => __('You must accept the terms and conditions')
+							)));
+					}
+				}
+
+				$this->request->data['Profile']['location_id'] = $locations_post;
+
+				$this->request->data['User']['password'] = '';
+				$this->request->data['User']['password_2'] = '';
+				$this->set('error_captcha', $recaptcha->error);
+				$this->Session->setFlash(__('The form is not completely filled.'), 'flash/error');
+			}
+		} else {
+			if ($this->Session->check('DataRegister') && $this->Session->check('AlternateLogin')) {
+				$this->request->data = $this->Session->read('DataRegister');
+				$AlternateLogin = $this->Session->read('DataRegister');
+
+				$locations = $this->Location->sections(array(0 => null));
+				if (!empty($this->request->data['User']['email'])) {
+					$user_exist = $this->User->find('first', array(
+						'conditions' => array(
+							'User.email' => $this->request->data['User']['email']
+						)
+						));
+				}
+
+				$user_twitter = $this->User->find('first', array(
+					'conditions' => array(
+						'User.username' => $this->request->data['User']['username']
+					)
+					));
+
+				if (!empty($user_exist)) {
+					$this->loginAuto($user_exist['User']['id'], $user_exist['User']['group_id'], $user_exist['User']['username'], $user_exist['User']['password'], $user_exist['User']['created'], $user_exist['User']['activated'], $user_exist['User']['modified'], $user_exist['User']['banned'], $user_exist['User']['deleted']);
+				} else {
+					
+				}
+				if (!empty($user_twitter)) {
+					$this->loginAuto($user_twitter['User']['id'], $user_twitter['User']['group_id'], $user_twitter['User']['username'], $user_twitter['User']['password'], $user_twitter['User']['created'], $user_twitter['User']['activated'], $user_twitter['User']['modified'], $user_twitter['User']['banned'], $user_twitter['User']['deleted']);
+				} else {
+					
+				}
+			} else {
+				$this->Session->setFlash(__('No data are obtained session, refresh the page'), 'flash/warning');
+			}
+		}
+		$this->set(compact('locations'));
+	}
+
+	public function login_twitter() {
+
+//		define('CONSUMER_KEY', 'bBnFVY5ULsq8fOEoAxb2wQ');
+		define('CONSUMER_KEY', Configure::read('Accounts.twitter.CONSUMER_KEY'));
+		define('CONSUMER_SECRET', Configure::read('Accounts.twitter.CONSUMER_SECRET'));
+		define('OAUTH_CALLBACK', Configure::read('Accounts.twitter.OAUTH_CALLBACK'));
+//		define('CONSUMER_SECRET', 'HpJbao3A2KMIw2ehNMDKxDiILXI4bwVZBo1d5yDTW4');
+//		define('OAUTH_CALLBACK', 'http://co.voulet.com/accounts/users/login_twitter');
+
+		Configure::read('Accounts.twitter.CONSUMER_KEY');
+		Configure::read('Accounts.twitter.CONSUMER_SECRET');
+		Configure::read('Accounts.twitter.OAUTH_CALLBACK');
+
+		if (isset($_REQUEST['oauth_token']) && $_SESSION['oauth_token'] !== $_REQUEST['oauth_token']) {
+			$_SESSION['oauth_status'] = 'oldtoken';
+		}
+
+		$connection = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET, $_SESSION['oauth_token'], $_SESSION['oauth_token_secret']);
+
+		$access_token = $connection->getAccessToken($_REQUEST['oauth_verifier']);
+
+		$_SESSION['access_token'] = $access_token;
+
+		if (200 == $connection->http_code) {
+
+			if (empty($_SESSION['access_token']) || empty($_SESSION['access_token']['oauth_token']) || empty($_SESSION['access_token']['oauth_token_secret'])) {
+				
+			}
+
+			$access_token = $_SESSION['access_token'];
+
+			$connection = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET, $access_token['oauth_token'], $access_token['oauth_token_secret']);
+
+			$content = $connection->get('account/verify_credentials');
+
+			$data_register = array(
+				'User' => $user_data = array(
+				'banned' => $this->request->data['User']['banned'] = '1800-01-01 00:00:00',
+				'deleted' => $this->request->data['User']['deleted'] = '1800-01-01 00:00:00',
+				'created' => $this->request->data['User']['created'] = date('Y-m-d H:i:s'),
+				'modified' => $this->request->data['User']['modified'] = '1800-01-01 00:00:00',
+				'username' => $this->request->data['User']['username'] = $content->screen_name,
+				'password' => '',
+				'email' => $this->request->data['User']['email'] = '',
+				'group_id' => $this->request->data['User']['group_id'] = 3
+				),
+				'Profile' => $profile_data = array(
+				'first_name' => $content->name,
+				'last_name' => '',
+				'birthday' => '',
+				'gender' => '',
+				'address' => '',
+				'docid' => '',
+				'mobile' => '',
+				'phone' => '',
+				'user_id' => $this->User->id,
+//				'location_id' => 
+				),
+				'AlternateLogin' => $AlternateLogin = array(
+				'uid' => $this->request->data['AlternateLogin']['uid'] = $content->id,
+				'user_id' => $this->request->data['AlternateLogin']['user_id'] = $this->User->id,
+				'social_network_id' => $this->request->data['AlternateLogin']['social_network_id'] = 3
+				)
+			);
+
+
+			$alternate_login = array(
+				'uid' => $this->request->data['AlternateLogin']['uid'] = $content->id,
+				'user_id' => $this->request->data['AlternateLogin']['user_id'] = $this->User->id,
+				'social_network_id' => $this->request->data['AlternateLogin']['social_network_id'] = 1
+			);
+
+
+			if ($data_register['Profile']['address'] == '' && $data_register['Profile']['docid'] == '' && $data_register['Profile']['mobile'] == '' && $data_register['Profile']['phone'] == '') {
+
+				$this->request->data = $data_register;
+
+				$this->Session->write('DataRegister', $data_register);
+				$this->Session->write('AlternateLogin', $alternate_login);
+
+				$this->redirect(array('plugin' => 'accounts', 'controller' => 'users', 'action' => 'complete_information'));
+			}
+		} else {
+			$this->redirect(array('plugin' => 'accounts', 'controller' => 'users', 'action' => 'welcome'));
+			$this->Session->setFlash(__('An error has occurred check their credentials'), 'flash/warning');
+		}
+	}
+
+	public function login_fb() {
+
+		$this->loadModel('Profile');
+		$this->loadModel('User');
+		$this->loadModel('AlternateLogin');
+		$this->loadModel('UserPassword');
+
+		if (isset($this->request->data['User']['at'])) {
+
+			$this->facebook->setAccessToken($this->request->data['User']['at']);
+			$this->fbuid = $this->facebook->getUser();
+			$this->accessToken = $this->Session->write('accessToken', $this->request->data['User']['at']);
+
+			$fbuser = $this->facebook->api('/me');
+
+			if (isset($fbuser['birthday'])) {
+				$birthday = date('Y-m-d', CakeTime::fromString($fbuser['birthday']));
+			} else {
+//				$birthday = '1970-01-01';
+				$birthday = '0001-01-01';
+			}
+
+			$data_register = array(
+				'User' => $user_data = array(
+				'banned' => $this->request->data['User']['banned'] = '1800-01-01 00:00:00',
+				'deleted' => $this->request->data['User']['deleted'] = '1800-01-01 00:00:00',
+				'created' => $this->request->data['User']['created'] = date('Y-m-d H:i:s'),
+				'modified' => $this->request->data['User']['modified'] = '1800-01-01 00:00:00',
+				'username' => $this->request->data['User']['username'] = $fbuser['email'],
+				'password' => '',
+				'email' => $this->request->data['User']['email'] = $fbuser['email'],
+				'group_id' => $this->request->data['User']['group_id'] = 3
+				),
+				'Profile' => $profile_data = array(
+				'first_name' => $fbuser['first_name'],
+				'last_name' => $fbuser['last_name'],
+				'birthday' => $birthday,
+				'gender' => $fbuser['gender'],
+//				'address' => isset($fbuser['hometown']['name']) ? $fbuser['hometown']['name'] : 'No definido',
+				'address' => '',
+				'docid' => '',
+				'mobile' => '',
+				'phone' => '',
+				'user_id' => $this->User->id,
+//				'location_id' => 
+				),
+				'AlternateLogin' => $AlternateLogin = array(
+				'uid' => $this->request->data['AlternateLogin']['uid'] = $fbuser['id'],
+				'user_id' => $this->request->data['AlternateLogin']['user_id'] = $this->User->id,
+				'social_network_id' => $this->request->data['AlternateLogin']['social_network_id'] = 1
+				)
+			);
+
+
+			$alternate_login = array(
+				'uid' => $this->request->data['AlternateLogin']['uid'] = $fbuser['id'],
+				'user_id' => $this->request->data['AlternateLogin']['user_id'] = $this->User->id,
+				'social_network_id' => $this->request->data['AlternateLogin']['social_network_id'] = 1
+			);
+
+
+			if ($data_register['Profile']['address'] == '' && $data_register['Profile']['docid'] == '' && $data_register['Profile']['mobile'] == '' && $data_register['Profile']['phone'] == '') {
+
+				$this->request->data = $data_register;
+
+				$this->Session->write('DataRegister', $data_register);
+				$this->Session->write('AlternateLogin', $alternate_login);
+
+				$this->redirect(array('plugin' => 'accounts', 'controller' => 'users', 'action' => 'complete_information'));
+			}
+		}
+	}
+
+	public function conect_twitter() {
+
+		define('CONSUMER_KEY', Configure::read('Accounts.twitter.CONSUMER_KEY'));
+		define('CONSUMER_SECRET', Configure::read('Accounts.twitter.CONSUMER_SECRET'));
+		define('OAUTH_CALLBACK', Configure::read('Accounts.twitter.OAUTH_CALLBACK'));
+
+		Configure::read('Accounts.twitter.CONSUMER_KEY');
+		Configure::read('Accounts.twitter.CONSUMER_SECRET');
+		Configure::read('Accounts.twitter.OAUTH_CALLBACK');
+
+
+		if (CONSUMER_KEY === '' || CONSUMER_SECRET === '' || CONSUMER_KEY === 'CONSUMER_KEY_HERE' || CONSUMER_SECRET === 'CONSUMER_SECRET_HERE') {
+
+			$this->Session->setFlash(__('You need a consumer key and secret to test the sample code. Get one from <a href="https://dev.twitter.com/apps">dev.twitter.com/apps</a>'), 'flash/error');
+		}
+
+		$connection = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET);
+
+		$request_token = $connection->getRequestToken(OAUTH_CALLBACK);
+
+		$_SESSION['oauth_token'] = $token = $request_token['oauth_token'];
+		$_SESSION['oauth_token_secret'] = $request_token['oauth_token_secret'];
+
+		//pr($connection->http_code);
+		switch ($connection->http_code) {
+			case 200:
+				/* Build authorize URL and redirect user to Twitter. */
+				$url = $connection->getAuthorizeURL($token);
+				$this->redirect($url);
+				//header('Location: ' . $url);
+				break;
+			default:
+				/* Show notification if something went wrong. */
+				echo 'Could not connect to Twitter. Refresh the page or try again later.';
 		}
 	}
 

@@ -111,7 +111,7 @@ CakeLog::config('error', array(
 //CakePlugin::loadAll('Accounts');
 
 
-Configure::write('Accounts.social_networks_enabled', FALSE);
+Configure::write('Accounts.social_networks_enabled', TRUE);
 
 
 /**Configuracion de Facebook**/

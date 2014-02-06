@@ -1,7 +1,7 @@
-<!--<script type="text/javascript">
-	connect();
+<script type="text/javascript">
+//	connect();
 //	alert('asdf');
-</script>-->
+</script>
 <?php //if (!isset($_POST['at'])): ?>
 <!--	<form id="login_fb" method="POST">
 		<input type="hidden" id="at" name="at"/>

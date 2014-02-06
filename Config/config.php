@@ -3,8 +3,8 @@
 $config = array(
 	'Accounts' => array(
 		'facebook' => array(
-			'appId' => '670029796360306',
-			'secret' => '422a2bb883dbcf1310eb2c801ff347a5',
+			'appId' => '570401413051500',
+			'secret' => '47f1a1ce5a4b740d2e58363b533627e1',
 			'channelUrl' => '//local.maspapaya.net/channel.html'
 		),
 		'google' => array(

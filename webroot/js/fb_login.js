@@ -8,9 +8,9 @@ var at;
 
 function connect() {
 	FB.init({
-//		appId: '636317959715475', // App ID from the app dashboard
+		//		appId: '636317959715475', // App ID from the app dashboard
 		appId: appId, // App ID from the app dashboard
-//		channelUrl: '//voulet.com/channel.html', // Channel file for x-domain comms
+		//		channelUrl: '//voulet.com/channel.html', // Channel file for x-domain comms
 		channelUrl: channelUrl, // Channel file for x-domain comms
 		status: true, // Check Facebook Login status
 		xfbml: true  // Look for social plugins on the page
@@ -20,8 +20,9 @@ function connect() {
 		if (response.authResponse) {
 			if (response.status == "connected") {
 				at = response.authResponse.accessToken;
+				
 				if (at != '') {
-					$('#UserLogAt').val(at);
+					$('#UserAt').val(at);
 					$('#fbform').submit();
 				} else {
 					console.log("Algo ha ocurrido, por favor vuelve a cargar la pagina");

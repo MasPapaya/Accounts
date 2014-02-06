@@ -2,11 +2,12 @@
 if (Configure::read('Accounts.social_networks_enabled')) {
 	$this->Html->script(
 		array(
+		'http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js',
 		'https://apis.google.com/js/plusone.js',
 		'https://apis.google.com/js/client:plusone.js',
 		'https://apis.google.com/js/plusone.js?onload=OnLoadCallback',
 		'http://connect.facebook.net/en_ES/all.js',
-		$this->Html->url('/') . strtolower($this->plugin) . '/js/fb_login'
+		'Accounts.fb_login',
 		), array('inline' => false)
 	);
 }
@@ -19,7 +20,7 @@ if (Configure::read('Accounts.social_networks_enabled')) {
 		<?php echo $this->Form->create('User', array('class' => 'form')); ?>
 		<fieldset>
 
-			<legend><?php echo __('Login')?></legend>
+			<legend><?php echo __('Login') ?></legend>
 			<?php
 			echo $this->Form->input('username', array('label' => __('User')));
 			echo $this->Form->input('password', array('label' => __('Password')));
@@ -61,7 +62,7 @@ if (Configure::read('Accounts.social_networks_enabled')) {
 			echo $this->Html->link('Twitter', array('controller' => 'Users', 'action' => 'conect_twitter'), array('escape' => false, 'class' => 'btn'));
 			?>
 			<?php
-			echo $this->Html->link('Google +', $authURL, array('escape' => false, 'class' => 'btn'));
+			//echo $this->Html->link('Google +', $authURL, array('escape' => false, 'class' => 'btn'));
 			?>
 		</div>
 	</div>
