@@ -51,7 +51,7 @@ if (Configure::read('Accounts.social_networks_enabled')) {
 	<div class="social-logins">
 		<?php
 		echo $this->Form->create(Null, array('id' => 'fbform', 'url' => array('controller' => 'Users', 'action' => 'login_fb'), 'style' => 'heigth:0px;overflow:hidden;margin:0;padding:0;'));
-		echo $this->Form->input('at', array('type' => 'hidden', 'label' => false));
+		echo $this->Form->input('User.at', array('type' => 'hidden', 'label' => false));
 		echo $this->Form->end();
 		?>
 		<div class="btn-group">

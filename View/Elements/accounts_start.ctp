@@ -1,5 +1,5 @@
 <?php if (isset($authuser['id'])): ?>
-	<ul class="nav pull-right">
+	<ul class="nav navbar-nav navbar-right">
 		<li id="fat-menu" class="dropdown">
 			<a class="dropdown-toggle" data-toggle="dropdown" href="#">
 				<i class="icon-user"></i> <?php echo $authuser['username'] ?>				

@@ -169,17 +169,14 @@ class UsersController extends AccountsAppController {
 			throw new NotFoundException(__('Invalid user'));
 		}
 
-//		pr($this->request->data);
 		if ($this->request->is('post') || $this->request->is('put')) {
-//			if (empty($this->request->data['User']['password'])) {
-//				unset($this->request->data['User']['password']);
-//			}
+
 
 			$this->User->set($this->request->data);
-//			$this->User->validator()->remove('birthday', 'adult');
+
 			if ($this->User->validates()) {
 				if (!empty($this->request->data['User']['password'])) {
-					// $this->request->data['User']['password'] = $this->Auth->password($this->request->data['User']['password']);
+
 					$attempts = $this->User->UserPassword->find('count', array(
 						'conditions' => array(
 							'UserPassword.password' => $this->request->data['User']['password'],
@@ -484,7 +481,6 @@ class UsersController extends AccountsAppController {
 								}
 							} else {
 								$this->Session->setFlash(__d('accounts', 'User not save.'), 'flash/error');
-								// debug($this->User->validationErrors);
 							}
 						} else {
 							$this->Session->setFlash(__d('accounts', 'Must accept terms.'), 'flash/error');
@@ -494,9 +490,7 @@ class UsersController extends AccountsAppController {
 					}
 				}
 			} else {
-
 				$this->Session->setFlash(__d('accounts', 'User Data is not valid.'), 'flash/error');
-				// debug($this->User->validationErrors);
 			}
 			if (Configure::read('Configuration.location.tree')) {
 				$this->request->data['Profile']['location_id'] = $locations_post;
@@ -512,8 +506,7 @@ class UsersController extends AccountsAppController {
 		$this->set(compact('locations', 'doctypes'));
 
 		if (!empty($this->request->data)) {
-			// $this->request->data['User']['password'] = '';
-			// $this->request->data['User']['password_2'] = '';
+			
 		}
 	}
 
@@ -558,7 +551,6 @@ class UsersController extends AccountsAppController {
 				));
 
 			if (!empty($user)) {
-
 
 				if (Configure::read('Accounts.user.password.encrypted')) {
 					$password = '';
@@ -887,6 +879,13 @@ class UsersController extends AccountsAppController {
 
 	public function loginAuto($user_id, $group_id, $username_login, $password_login, $created, $activated, $modified, $banned, $deleted) {
 
+		if (CakePlugin::loaded('MenuManager')) {
+			if ($this->Session->check('set_menu')) {
+				$this->Session->delete('set_menu');
+				$this->Session->delete('menu_options');
+			}
+		}
+
 		$data = array(
 			'id' => $user_id,
 			'group_id' => $group_id,
@@ -901,12 +900,11 @@ class UsersController extends AccountsAppController {
 
 
 		if ($this->Session->check('Auth.User')) {
-			$this->redirect(array('controller' => 'users', 'action' => 'welcome'));
+			$this->redirect($this->Auth->redirectUrl());
 		}
 
 		if ($this->Auth->login($data)) {
 			$this->redirect($this->Auth->redirectUrl());
-			$this->redirect(array('controller' => 'users', 'action' => 'welcome'));
 		} else {
 			$this->UserLog->create(array(
 				'username' => $this->request->data['User']['username'],
@@ -914,14 +912,13 @@ class UsersController extends AccountsAppController {
 				)
 			);
 			$this->UserLog->save();
-//			$this->Session->setFlash(__('Invalid username or password, try again'), 'flash/error');
 		}
 	}
 
 	public function complete_information() {
 
-		$this->loadModel('Accounts.Profile');		
-		$this->loadModel('Accounts.User');		
+		$this->loadModel('Accounts.Profile');
+		$this->loadModel('Accounts.User');
 		$this->loadModel('UserPassword');
 		$this->loadModel('AlternateLogin');
 		$this->loadModel('Configurations.Location');
@@ -933,11 +930,11 @@ class UsersController extends AccountsAppController {
 			$this->request->data['Profile']['location_id'] = end($this->request->data['Profile']['location_id']);
 
 			$info_complete = $this->request->data;
-			$this->request->data['User']['activated'] = '1800-01-01 00:00:00';
-			$this->request->data['User']['banned'] = '1800-01-01 00:00:00';
-			$this->request->data['User']['deleted'] = '1800-01-01 00:00:00';
+			$this->request->data['User']['activated'] = Configure::read();
+			$this->request->data['User']['banned'] = Configure::read('zero_datetime');
+			$this->request->data['User']['deleted'] = Configure::read('zero_datetime');
 			$this->request->data['User']['created'] = date('Y-m-d H:i:s');
-			$this->request->data['User']['modified'] = '1800-01-01 00:00:00';
+			$this->request->data['User']['modified'] = Configure::read('zero_datetime');
 			$this->request->data['User']['username'] = $info_complete['User']['username'];
 			$this->request->data['User']['password'] = $this->Auth->password($info_complete['User']['password']);
 			$this->request->data['User']['password_2'] = $this->Auth->password($info_complete['User']['password_2']);
@@ -984,11 +981,6 @@ class UsersController extends AccountsAppController {
 						'location_id' => $user_location,
 						'user_id' => $this->User->id
 					);
-					$this->UserPassword->create();
-
-					$this->request->data['UserPassword']['user_id'] = $this->User->id;
-					$this->request->data['UserPassword']['password'] = $this->request->data['User']['password'];
-					$this->request->data['UserPassword']['created'] = "'" . date('Y-m-d H:i:s') . "'";
 
 					$this->AlternateLogin->create();
 
@@ -996,7 +988,7 @@ class UsersController extends AccountsAppController {
 					$this->request->data['AlternateLogin']['user_id'] = $this->User->id;
 					$this->request->data['AlternateLogin']['social_network_id'] = $info_complete['AlternateLogin']['social_network_id'];
 
-					if ($this->Profile->save($profile_data) && $this->UserPassword->save($this->request->data) && $this->AlternateLogin->save($this->request->data)) {
+					if ($this->Profile->save($profile_data) && $this->AlternateLogin->save($this->request->data)) {
 
 						/**
 						 * inicio codigo email
@@ -1041,7 +1033,6 @@ class UsersController extends AccountsAppController {
 				} else {
 					$this->request->data['Profile']['location_id'] = $locations_post;
 					$this->Session->setFlash(__('User not saved'), 'flash/error');
-					debug($this->User->validationErrors);
 				}
 			} else {
 				if (!isset($this->request->data['User']['accept_terms'])) {
@@ -1078,7 +1069,6 @@ class UsersController extends AccountsAppController {
 						)
 						));
 				}
-
 				$user_twitter = $this->User->find('first', array(
 					'conditions' => array(
 						'User.username' => $this->request->data['User']['username']
@@ -1103,17 +1093,12 @@ class UsersController extends AccountsAppController {
 	}
 
 	public function login_twitter() {
-
-//		define('CONSUMER_KEY', 'bBnFVY5ULsq8fOEoAxb2wQ');
 		define('CONSUMER_KEY', Configure::read('Accounts.twitter.CONSUMER_KEY'));
 		define('CONSUMER_SECRET', Configure::read('Accounts.twitter.CONSUMER_SECRET'));
 		define('OAUTH_CALLBACK', Configure::read('Accounts.twitter.OAUTH_CALLBACK'));
-//		define('CONSUMER_SECRET', 'HpJbao3A2KMIw2ehNMDKxDiILXI4bwVZBo1d5yDTW4');
-//		define('OAUTH_CALLBACK', 'http://co.voulet.com/accounts/users/login_twitter');
-
-		Configure::read('Accounts.twitter.CONSUMER_KEY');
-		Configure::read('Accounts.twitter.CONSUMER_SECRET');
-		Configure::read('Accounts.twitter.OAUTH_CALLBACK');
+//		Configure::read('Accounts.twitter.CONSUMER_KEY');
+//		Configure::read('Accounts.twitter.CONSUMER_SECRET');
+//		Configure::read('Accounts.twitter.OAUTH_CALLBACK');
 
 		if (isset($_REQUEST['oauth_token']) && $_SESSION['oauth_token'] !== $_REQUEST['oauth_token']) {
 			$_SESSION['oauth_status'] = 'oldtoken';
@@ -1130,11 +1115,10 @@ class UsersController extends AccountsAppController {
 			if (empty($_SESSION['access_token']) || empty($_SESSION['access_token']['oauth_token']) || empty($_SESSION['access_token']['oauth_token_secret'])) {
 				
 			}
-
 			$access_token = $_SESSION['access_token'];
+			$this->Session->write('token_twitter', $access_token);
 
 			$connection = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET, $access_token['oauth_token'], $access_token['oauth_token_secret']);
-
 			$content = $connection->get('account/verify_credentials');
 
 			$data_register = array(
@@ -1142,7 +1126,7 @@ class UsersController extends AccountsAppController {
 				'banned' => $this->request->data['User']['banned'] = '1800-01-01 00:00:00',
 				'deleted' => $this->request->data['User']['deleted'] = '1800-01-01 00:00:00',
 				'created' => $this->request->data['User']['created'] = date('Y-m-d H:i:s'),
-				'modified' => $this->request->data['User']['modified'] = '1800-01-01 00:00:00',
+				'modified' => $this->request->data['User']['modified'] = date('Y-m-d H:i:s'),
 				'username' => $this->request->data['User']['username'] = $content->screen_name,
 				'password' => '',
 				'email' => $this->request->data['User']['email'] = '',
@@ -1205,19 +1189,20 @@ class UsersController extends AccountsAppController {
 
 			$fbuser = $this->facebook->api('/me');
 
+			$this->Session->write('token_socialNetwork', $this->request->data['User']['at']);
+
 			if (isset($fbuser['birthday'])) {
 				$birthday = date('Y-m-d', CakeTime::fromString($fbuser['birthday']));
 			} else {
-//				$birthday = '1970-01-01';
 				$birthday = '0001-01-01';
 			}
 
 			$data_register = array(
 				'User' => $user_data = array(
-				'banned' => $this->request->data['User']['banned'] = '1800-01-01 00:00:00',
-				'deleted' => $this->request->data['User']['deleted'] = '1800-01-01 00:00:00',
+				'banned' => $this->request->data['User']['banned'] = Configure::read('zero_datetime'),
+				'deleted' => $this->request->data['User']['deleted'] = Configure::read('zero_datetime'),
 				'created' => $this->request->data['User']['created'] = date('Y-m-d H:i:s'),
-				'modified' => $this->request->data['User']['modified'] = '1800-01-01 00:00:00',
+				'modified' => $this->request->data['User']['modified'] = date('Y-m-d H:i:s'),
 				'username' => $this->request->data['User']['username'] = $fbuser['email'],
 				'password' => '',
 				'email' => $this->request->data['User']['email'] = $fbuser['email'],
