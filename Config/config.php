@@ -3,9 +3,9 @@
 $config = array(
 	'Accounts' => array(
 		'facebook' => array(
-			'appId' => '570401413051500',
-			'secret' => '47f1a1ce5a4b740d2e58363b533627e1',
-			'channelUrl' => '//local.maspapaya.net/channel.html'
+			'appId' => '209300562598963',
+			'secret' => '3324210a5e0bcb2aac02e7b0bcf038ca',
+			'channelUrl' => 'http://schicklatinoamerica.com/AllAccessFest/channel.html'
 		),
 		'google' => array(
 			'setClientId' => '636754727800.apps.googleusercontent.com',

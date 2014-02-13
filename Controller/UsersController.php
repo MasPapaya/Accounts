@@ -917,6 +917,8 @@ class UsersController extends AccountsAppController {
 
 	public function complete_information() {
 
+
+
 		$this->loadModel('Accounts.Profile');
 		$this->loadModel('Accounts.User');
 		$this->loadModel('UserPassword');
@@ -930,7 +932,7 @@ class UsersController extends AccountsAppController {
 			$this->request->data['Profile']['location_id'] = end($this->request->data['Profile']['location_id']);
 
 			$info_complete = $this->request->data;
-			$this->request->data['User']['activated'] = Configure::read();
+			$this->request->data['User']['activated'] = date('Y-m-d H:i:s');
 			$this->request->data['User']['banned'] = Configure::read('zero_datetime');
 			$this->request->data['User']['deleted'] = Configure::read('zero_datetime');
 			$this->request->data['User']['created'] = date('Y-m-d H:i:s');
@@ -939,7 +941,7 @@ class UsersController extends AccountsAppController {
 			$this->request->data['User']['password'] = $this->Auth->password($info_complete['User']['password']);
 			$this->request->data['User']['password_2'] = $this->Auth->password($info_complete['User']['password_2']);
 			$this->request->data['User']['email'] = $info_complete['User']['email'];
-			$this->request->data['User']['group_id'] = 1;
+			$this->request->data['User']['group_id'] = Configure::read('Accounts.social_groupid_default');
 
 			$recaptcha = recaptcha_check_answer(Configure::read('Accounts.recaptcha.PrivateKey'), $_SERVER["REMOTE_ADDR"], $this->request->data["recaptcha_challenge_field"], $this->request->data["recaptcha_response_field"]);
 			$this->User->set($info_complete);
@@ -954,9 +956,6 @@ class UsersController extends AccountsAppController {
 			if ($this->User->validates() && $this->User->Profile->validates() && $recaptcha->is_valid & isset($this->request->data['User']['accept_terms']) & $this->request->data['User']['accept_terms'] == 1) {
 
 				$this->User->create();
-
-//				debug($this->request->data());
-
 				if ($this->User->save($this->request->data)) {
 					switch ($info_complete['Profile']['gender']) {
 						case 'male':
@@ -1050,7 +1049,6 @@ class UsersController extends AccountsAppController {
 				}
 
 				$this->request->data['Profile']['location_id'] = $locations_post;
-
 				$this->request->data['User']['password'] = '';
 				$this->request->data['User']['password_2'] = '';
 				$this->set('error_captcha', $recaptcha->error);

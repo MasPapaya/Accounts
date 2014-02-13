@@ -31,24 +31,24 @@ Cache::config('default', array('engine' => 'File'));
  * The settings below can be used to set additional paths to models, views and controllers.
  *
  * App::build(array(
- *	 'Model'					 => array('/path/to/models', '/next/path/to/models'),
- *	 'Model/Behavior'			=> array('/path/to/behaviors', '/next/path/to/behaviors'),
- *	 'Model/Datasource'		  => array('/path/to/datasources', '/next/path/to/datasources'),
- *	 'Model/Datasource/Database' => array('/path/to/databases', '/next/path/to/database'),
- *	 'Model/Datasource/Session'  => array('/path/to/sessions', '/next/path/to/sessions'),
- *	 'Controller'				=> array('/path/to/controllers', '/next/path/to/controllers'),
- *	 'Controller/Component'	  => array('/path/to/components', '/next/path/to/components'),
- *	 'Controller/Component/Auth' => array('/path/to/auths', '/next/path/to/auths'),
- *	 'Controller/Component/Acl'  => array('/path/to/acls', '/next/path/to/acls'),
- *	 'View'					  => array('/path/to/views', '/next/path/to/views'),
- *	 'View/Helper'			   => array('/path/to/helpers', '/next/path/to/helpers'),
- *	 'Console'				   => array('/path/to/consoles', '/next/path/to/consoles'),
- *	 'Console/Command'		   => array('/path/to/commands', '/next/path/to/commands'),
- *	 'Console/Command/Task'	  => array('/path/to/tasks', '/next/path/to/tasks'),
- *	 'Lib'					   => array('/path/to/libs', '/next/path/to/libs'),
- *	 'Locale'					=> array('/path/to/locales', '/next/path/to/locales'),
- *	 'Vendor'					=> array('/path/to/vendors', '/next/path/to/vendors'),
- *	 'Plugin'					=> array('/path/to/plugins', '/next/path/to/plugins'),
+ * 	 'Model'					 => array('/path/to/models', '/next/path/to/models'),
+ * 	 'Model/Behavior'			=> array('/path/to/behaviors', '/next/path/to/behaviors'),
+ * 	 'Model/Datasource'		  => array('/path/to/datasources', '/next/path/to/datasources'),
+ * 	 'Model/Datasource/Database' => array('/path/to/databases', '/next/path/to/database'),
+ * 	 'Model/Datasource/Session'  => array('/path/to/sessions', '/next/path/to/sessions'),
+ * 	 'Controller'				=> array('/path/to/controllers', '/next/path/to/controllers'),
+ * 	 'Controller/Component'	  => array('/path/to/components', '/next/path/to/components'),
+ * 	 'Controller/Component/Auth' => array('/path/to/auths', '/next/path/to/auths'),
+ * 	 'Controller/Component/Acl'  => array('/path/to/acls', '/next/path/to/acls'),
+ * 	 'View'					  => array('/path/to/views', '/next/path/to/views'),
+ * 	 'View/Helper'			   => array('/path/to/helpers', '/next/path/to/helpers'),
+ * 	 'Console'				   => array('/path/to/consoles', '/next/path/to/consoles'),
+ * 	 'Console/Command'		   => array('/path/to/commands', '/next/path/to/commands'),
+ * 	 'Console/Command/Task'	  => array('/path/to/tasks', '/next/path/to/tasks'),
+ * 	 'Lib'					   => array('/path/to/libs', '/next/path/to/libs'),
+ * 	 'Locale'					=> array('/path/to/locales', '/next/path/to/locales'),
+ * 	 'Vendor'					=> array('/path/to/vendors', '/next/path/to/vendors'),
+ * 	 'Plugin'					=> array('/path/to/plugins', '/next/path/to/plugins'),
  * ));
  *
  */
@@ -105,28 +105,14 @@ CakeLog::config('error', array(
 	'file' => 'error',
 ));
 
-//CakePlugin::loadAll('DebugKit');
-//CakePlugin::loadAll('Documents');
-//CakePlugin::loadAll('Resources');
-//CakePlugin::loadAll('Accounts');
 
 
 Configure::write('Accounts.social_networks_enabled', TRUE);
+Configure::write('Accounts.social_facebook_enabled', TRUE);
+Configure::write('Accounts.social_twitter_enabled', FALSE);
+Configure::write('Accounts.social_googleplus_enabled', FALSE);
+Configure::write('Accounts.social_groupid_default', 1);
 
-
-/**Configuracion de Facebook**/
-//Configure::write('Accounts.facebook.appId', '636317959715475');
-//Configure::write('Accounts.facebook.secret', 'c496bab96bcae381a0702eab59c413fc');
-//
-///**Configuracion de Google**/
-//Configure::write('Accounts','google.setClientId','788031891501.apps.googleusercontent.com');
-//Configure::write('Accounts','google.setClientSecret','MF6oNHslTYnt2r06RCIVpPfF');
-//
-///**Configuracion de Twitter**/
-//Configure::write('Accounts.twitter.CONSUMER_KEY','bBnFVY5ULsq8fOEoAxb2wQ');
-//Configure::write('Accounts.twitter.CONSUMER_SECRET','HpJbao3A2KMIw2ehNMDKxDiILXI4bwVZBo1d5yDTW4');
-//Configure::write('Accounts.twitter.OAUTH_CALLBACK','http://co.voulet.com/accounts/users/login_twitter');
-
-/**Configuracion de reCaptcha**/
-Configure::write('Accounts.recaptcha.Publickey','6LdapuISAAAAACcWY-bk65Mxu83JYA5lMSb3Zl84');
-Configure::write('Accounts.recaptcha.PrivateKey','6LdapuISAAAAAAM_aTEA48fTSAOu6AkwU1uHX7vJ');
+/* * Configuracion de reCaptcha* */
+Configure::write('Accounts.recaptcha.Publickey', '6LdapuISAAAAACcWY-bk65Mxu83JYA5lMSb3Zl84');
+Configure::write('Accounts.recaptcha.PrivateKey', '6LdapuISAAAAAAM_aTEA48fTSAOu6AkwU1uHX7vJ');

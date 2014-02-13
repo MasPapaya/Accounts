@@ -56,13 +56,19 @@ if (Configure::read('Accounts.social_networks_enabled')) {
 		?>
 		<div class="btn-group">
 			<?php
-			echo $this->Html->link('Facebook', '#', array('id' => 'fb_login', 'class' => 'btn'));
+			if (Configure::read('Accounts.social_facebook_enabled')) {
+				echo $this->Html->link('Facebook', '#', array('id' => 'fb_login', 'class' => 'btn btn-default'));
+			}
 			?>
 			<?php
-			echo $this->Html->link('Twitter', array('controller' => 'Users', 'action' => 'conect_twitter'), array('escape' => false, 'class' => 'btn'));
+			if (Configure::read('Accounts.social_twitter_enabled')) {
+				echo $this->Html->link('Twitter', array('controller' => 'Users', 'action' => 'conect_twitter'), array('escape' => false, 'class' => 'btn btn-default'));
+			}
 			?>
 			<?php
-			//echo $this->Html->link('Google +', $authURL, array('escape' => false, 'class' => 'btn'));
+			if (Configure::read('Accounts.social_googleplus_enabled')) {
+				echo $this->Html->link('Google +', $authURL, array('escape' => false, 'class' => 'btn'));
+			}
 			?>
 		</div>
 	</div>
