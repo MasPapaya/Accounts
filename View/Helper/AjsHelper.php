@@ -8,7 +8,7 @@ class AjsHelper extends AppHelper {
 	public $helpers = array('Html', 'Session', 'Paginator', 'Js' => array('Jquery'), 'Form','Time');
 
 	public function button($icon, $url, $class, $update) {
-		return $this->Js->link('<i class="' . $icon . '"></i>', $url, array('escape' => FALSE, 'class' => 'btn ' . $class, 'update' => $update));
+		return $this->Js->link('<i class="' . $icon . '"></i>', $url, array('escape' => FALSE, 'class' => 'btn btn-default ' . $class, 'update' => $update));
 	}
 
 	public function numbers() {
