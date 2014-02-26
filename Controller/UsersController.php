@@ -35,6 +35,9 @@ class UsersController extends AccountsAppController {
 
 	public function beforeFilter() {
 		parent::beforeFilter();
+		if (CakePlugin::loaded('Gamification') {
+			$this->components = array('Resources.Resources');
+		}
 
 		$this->facebook = new Facebook(array(
 				'appId' => Configure::read('Accounts.facebook.appId'),
@@ -235,7 +238,7 @@ class UsersController extends AccountsAppController {
 	}
 
 	public function login() {
-		$this->loadModel('UserLog');
+		$this->loadModel('Accounts.UserLog');
 		if ($this->Session->read('Auth.User')) {
 			$this->redirect(array('plugin' => 'dashboard', 'controller' => 'Dashboard'));
 		}
@@ -916,9 +919,6 @@ class UsersController extends AccountsAppController {
 	}
 
 	public function complete_information() {
-
-
-
 		$this->loadModel('Accounts.Profile');
 		$this->loadModel('Accounts.User');
 		$this->loadModel('UserPassword');
@@ -957,6 +957,9 @@ class UsersController extends AccountsAppController {
 
 				$this->User->create();
 				if ($this->User->save($this->request->data)) {
+					if (CakePlugin::loaded('Gamification') && $this->request->data['Resource']['filename']) {
+						$this->Resources->saveFromUrl($this->User->id, 'user', $this->request->data['Resource']['filename'], 'image', 'picture');
+					}
 					switch ($info_complete['Profile']['gender']) {
 						case 'male':
 							$gender = 'M';
@@ -1055,33 +1058,18 @@ class UsersController extends AccountsAppController {
 				$this->Session->setFlash(__('The form is not completely filled.'), 'flash/error');
 			}
 		} else {
-			if ($this->Session->check('DataRegister') && $this->Session->check('AlternateLogin')) {
+			$locations = $this->Location->sections(array(0 => null));
+			if ($this->Session->check('DataRegister') && $this->Session->check('DataRegister.AlternateLogin')) {
 				$this->request->data = $this->Session->read('DataRegister');
-				$AlternateLogin = $this->Session->read('DataRegister');
+				$AlternateLogin = $this->Session->read('DataRegister.AlternateLogin');
 
-				$locations = $this->Location->sections(array(0 => null));
-				if (!empty($this->request->data['User']['email'])) {
-					$user_exist = $this->User->find('first', array(
-						'conditions' => array(
-							'User.email' => $this->request->data['User']['email']
-						)
-						));
-				}
-				$user_twitter = $this->User->find('first', array(
-					'conditions' => array(
-						'User.username' => $this->request->data['User']['username']
-					)
+				$user_exist = $this->AlternateLogin->find('first', array(
+					'fields' => array('User.*'),
+					'conditions' => array('uid' => $AlternateLogin['uid'], 'SocialNetwork.id' => $AlternateLogin['social_network_id'], 'User.deleted' => Configure::read('zero_datetime'), 'User.banned' => Configure::read('zero_datetime'))
 					));
 
 				if (!empty($user_exist)) {
 					$this->loginAuto($user_exist['User']['id'], $user_exist['User']['group_id'], $user_exist['User']['username'], $user_exist['User']['password'], $user_exist['User']['created'], $user_exist['User']['activated'], $user_exist['User']['modified'], $user_exist['User']['banned'], $user_exist['User']['deleted']);
-				} else {
-					
-				}
-				if (!empty($user_twitter)) {
-					$this->loginAuto($user_twitter['User']['id'], $user_twitter['User']['group_id'], $user_twitter['User']['username'], $user_twitter['User']['password'], $user_twitter['User']['created'], $user_twitter['User']['activated'], $user_twitter['User']['modified'], $user_twitter['User']['banned'], $user_twitter['User']['deleted']);
-				} else {
-					
 				}
 			} else {
 				$this->Session->setFlash(__('No data are obtained session, refresh the page'), 'flash/warning');
@@ -1094,9 +1082,6 @@ class UsersController extends AccountsAppController {
 		define('CONSUMER_KEY', Configure::read('Accounts.twitter.CONSUMER_KEY'));
 		define('CONSUMER_SECRET', Configure::read('Accounts.twitter.CONSUMER_SECRET'));
 		define('OAUTH_CALLBACK', Configure::read('Accounts.twitter.OAUTH_CALLBACK'));
-//		Configure::read('Accounts.twitter.CONSUMER_KEY');
-//		Configure::read('Accounts.twitter.CONSUMER_SECRET');
-//		Configure::read('Accounts.twitter.OAUTH_CALLBACK');
 
 		if (isset($_REQUEST['oauth_token']) && $_SESSION['oauth_token'] !== $_REQUEST['oauth_token']) {
 			$_SESSION['oauth_status'] = 'oldtoken';
@@ -1119,6 +1104,12 @@ class UsersController extends AccountsAppController {
 			$connection = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET, $access_token['oauth_token'], $access_token['oauth_token_secret']);
 			$content = $connection->get('account/verify_credentials');
 
+			if (!empty($content->profile_image_url)) {
+				$filename = implode('_', array_slice(explode('_', $content->profile_image_url), 0, 2)) . '.' . implode('.', array_slice(explode('.', $content->profile_image_url), -1));
+			} else {
+				$filename = '';
+			}
+
 			$data_register = array(
 				'User' => $user_data = array(
 				'banned' => $this->request->data['User']['banned'] = '1800-01-01 00:00:00',
@@ -1130,22 +1121,25 @@ class UsersController extends AccountsAppController {
 				'email' => $this->request->data['User']['email'] = '',
 				'group_id' => $this->request->data['User']['group_id'] = 3
 				),
-				'Profile' => $profile_data = array(
-				'first_name' => $content->name,
-				'last_name' => '',
-				'birthday' => '',
-				'gender' => '',
-				'address' => '',
-				'docid' => '',
-				'mobile' => '',
-				'phone' => '',
-				'user_id' => $this->User->id,
+				'Profile' => array(
+					'first_name' => $content->name,
+					'last_name' => '',
+					'birthday' => '',
+					'gender' => '',
+					'address' => '',
+					'docid' => '',
+					'mobile' => '',
+					'phone' => '',
+					'user_id' => $this->User->id,
 //				'location_id' => 
 				),
-				'AlternateLogin' => $AlternateLogin = array(
-				'uid' => $this->request->data['AlternateLogin']['uid'] = $content->id,
-				'user_id' => $this->request->data['AlternateLogin']['user_id'] = $this->User->id,
-				'social_network_id' => $this->request->data['AlternateLogin']['social_network_id'] = 3
+				'AlternateLogin' => array(
+					'uid' => $this->request->data['AlternateLogin']['uid'] = $content->id,
+					'user_id' => $this->request->data['AlternateLogin']['user_id'] = $this->User->id,
+					'social_network_id' => $this->request->data['AlternateLogin']['social_network_id'] = 3
+				),
+				'Resource' => array(
+					'filename' => $filename
 				)
 			);
 
@@ -1194,7 +1188,7 @@ class UsersController extends AccountsAppController {
 			} else {
 				$birthday = '0001-01-01';
 			}
-
+			$filename = 'http://graph.facebook.com/' . $fbuser['id'] . '/picture?width=240&height=240';
 			$data_register = array(
 				'User' => $user_data = array(
 				'banned' => $this->request->data['User']['banned'] = Configure::read('zero_datetime'),
@@ -1206,23 +1200,26 @@ class UsersController extends AccountsAppController {
 				'email' => $this->request->data['User']['email'] = $fbuser['email'],
 				'group_id' => $this->request->data['User']['group_id'] = 3
 				),
-				'Profile' => $profile_data = array(
-				'first_name' => $fbuser['first_name'],
-				'last_name' => $fbuser['last_name'],
-				'birthday' => $birthday,
-				'gender' => $fbuser['gender'],
+				'Profile' => array(
+					'first_name' => $fbuser['first_name'],
+					'last_name' => $fbuser['last_name'],
+					'birthday' => $birthday,
+					'gender' => $fbuser['gender'],
 //				'address' => isset($fbuser['hometown']['name']) ? $fbuser['hometown']['name'] : 'No definido',
-				'address' => '',
-				'docid' => '',
-				'mobile' => '',
-				'phone' => '',
-				'user_id' => $this->User->id,
+					'address' => '',
+					'docid' => '',
+					'mobile' => '',
+					'phone' => '',
+					'user_id' => $this->User->id,
 //				'location_id' => 
 				),
-				'AlternateLogin' => $AlternateLogin = array(
-				'uid' => $this->request->data['AlternateLogin']['uid'] = $fbuser['id'],
-				'user_id' => $this->request->data['AlternateLogin']['user_id'] = $this->User->id,
-				'social_network_id' => $this->request->data['AlternateLogin']['social_network_id'] = 1
+				'AlternateLogin' => array(
+					'uid' => $this->request->data['AlternateLogin']['uid'] = $fbuser['id'],
+					'user_id' => $this->request->data['AlternateLogin']['user_id'] = $this->User->id,
+					'social_network_id' => $this->request->data['AlternateLogin']['social_network_id'] = 1
+				),
+				'Resource' => array(
+					'filename' => $filename
 				)
 			);
 

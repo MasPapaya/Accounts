@@ -109,9 +109,10 @@ CakeLog::config('error', array(
 
 Configure::write('Accounts.social_networks_enabled', TRUE);
 Configure::write('Accounts.social_facebook_enabled', TRUE);
-Configure::write('Accounts.social_twitter_enabled', FALSE);
+Configure::write('Accounts.social_twitter_enabled', TRUE);
 Configure::write('Accounts.social_googleplus_enabled', FALSE);
 Configure::write('Accounts.social_groupid_default', 1);
+Configure::write('Accounts.is_recaptcha', FALSE);
 
 /* * Configuracion de reCaptcha* */
 Configure::write('Accounts.recaptcha.Publickey', '6LdapuISAAAAACcWY-bk65Mxu83JYA5lMSb3Zl84');

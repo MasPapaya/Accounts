@@ -104,6 +104,14 @@ class User extends AccountsAppModel {
 		// 	),
 		// ),
 		'email' => array(
+			'notempty' => array(
+				'rule' => array('notempty'),
+				//'message' => 'Your custom message here',
+				//'allowEmpty' => false,
+				//'required' => false,
+				//'last' => false, // Stop validation after this rule
+				'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
 			'unique' => array(
 				'rule' => 'IsUnique',
 				'message' => 'email already exists',
@@ -111,6 +119,14 @@ class User extends AccountsAppModel {
 			//'required' => false,
 			//'last' => false, // Stop validation after this rule
 			//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+			'compare_email' => array(
+				'rule' => array('compare_email'),
+				'message' => 'Email not equal',
+				'allowEmpty' => TRUE,
+			//'required' => false,
+			//'last' => false, // Stop validation after this rule
+//			 'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 			// 'email'=>'email'
 			'email' => array(
@@ -292,6 +308,17 @@ class User extends AccountsAppModel {
 			if ($this->data['User']['password'] === $this->data['User']['password_2']) {
 				return TRUE;
 			}
+		}
+		return FALSE;
+	}
+
+	public function compare_email() {
+		if (isset($this->data['User']['email']) && isset($this->data['User']['email_2'])) {
+			if ($this->data['User']['email'] === $this->data['User']['email_2']) {
+				return TRUE;
+			}
+		}else{
+			return TRUE;
 		}
 		return FALSE;
 	}
