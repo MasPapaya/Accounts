@@ -8,7 +8,7 @@ if (Configure::read('Accounts.social_networks_enabled')) {
 		'https://apis.google.com/js/plusone.js?onload=OnLoadCallback',
 		'http://connect.facebook.net/en_ES/all.js',
 		'Accounts.fb_login',
-		), array('inline' => false)
+		)
 	);
 }
 ?>

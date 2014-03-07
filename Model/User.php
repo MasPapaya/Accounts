@@ -248,7 +248,7 @@ class User extends AccountsAppModel {
 	);
 
 	public function beforeSave($options = array()) {
-
+		
 		if (isset($this->data['User']['password']) && $this->data['User']['password'] == '') {
 			unset($this->data['User']['password']);
 			unset($this->data['User']['password_2']);

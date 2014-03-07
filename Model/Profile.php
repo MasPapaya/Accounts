@@ -34,6 +34,16 @@ class Profile extends AccountsAppModel {
 			//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 		),
+		'location_id' => array(
+			'notempty' => array(
+				'rule' => array('notempty'),
+				//'message' => 'Your custom message here',
+				//'allowEmpty' => false,
+				'required' => true,
+			//'last' => false, // Stop validation after this rule
+			//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		),
 		'docid_type_id' => array(
 			'numeric' => array(
 				'rule' => array('numeric'),
@@ -88,7 +98,34 @@ class Profile extends AccountsAppModel {
 			//'required' => false,
 			//'last' => false, // Stop validation after this rule
 			//'on' => 'create', // Limit validation to 'create' or 'update' operations
-			)
+			),
+			'unique' => array(
+				'rule' => 'isUnique',
+				'message' => 'docid already exists',
+			//'allowEmpty' => false,
+			//'required' => false,
+			//'last' => false, // Stop validation after this rule
+			//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		),
+		'age' => array(
+			'regexp' => array(
+//				'rule' => '/^([0-9])$/',
+				'rule' => '/^[0-9]{1,3}$/i',
+				'message' => 'incorrecto',
+			//'allowEmpty' => false,
+			//'required' => false,
+			//'last' => false, // Stop validation after this rule
+			//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+			'notempty' => array(
+				'rule' => array('notempty'),
+				'message' => 'notempty',
+			//'allowEmpty' => false,
+			//'required' => false,
+			//'last' => false, // Stop validation after this rule
+			//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
 		),
 		'gender' => array(
 			'notempty' => array(

@@ -35,7 +35,7 @@ class UsersController extends AccountsAppController {
 
 	public function beforeFilter() {
 		parent::beforeFilter();
-		if (CakePlugin::loaded('Gamification') {
+		if (CakePlugin::loaded('Gamification')) {
 			$this->components = array('Resources.Resources');
 		}
 
@@ -319,6 +319,7 @@ class UsersController extends AccountsAppController {
 				$this->Session->delete('menu_options');
 			}
 		}
+//		pr($this->Auth->password('superadmin'));
 	}
 
 	public function logout() {
@@ -787,8 +788,7 @@ class UsersController extends AccountsAppController {
 
 				$this->request->data = $profile;
 				unset($this->request->data ['User']['password']);
-				$this->request->data = array_merge($this->request->data, $this->Attribute->getSaved($this->authuser['id'], 'user', 'create')
-				);
+				$this->request->data = array_merge($this->request->data, $this->Attribute->getSaved($this->authuser['id'], 'user', 'create'));
 			}
 			if (Configure::read('Configuration.location.tree')) {
 				if (!empty($this->request->data['Profile']['location_id'])) {
